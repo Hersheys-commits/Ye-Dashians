@@ -66,7 +66,7 @@ const Header = () => {
               <div className="flex flex-col space-y-2 p-2">
                 <button
                   className="text-left p-2 hover:bg-gray-100"
-                  onClick={() => alert('Go to Profile')}
+                  onClick={() => {navigateTo('/user/profile')}}
                 >
                   Profile
                 </button>

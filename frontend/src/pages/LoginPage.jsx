@@ -29,11 +29,11 @@ const LoginPage = () => {
           },
         }
       );
-      console.log(response.data);
+      console.log(response);
       toast.success(response.data.message || "User logged in successfully");
 
       // Save the token to localStorage
-      localStorage.setItem("jwt", response.data.token);
+      localStorage.setItem("jwt", response.data.data.accessToken);
 
       // Dispatch the login action to update the store with user info
       dispatch(login({ userInfo: response.data.user, token: response.data.token }));

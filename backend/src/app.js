@@ -18,6 +18,7 @@ app.use(cookieParser())
 
 
 //routes import
+import friendRouter from './route/friend.route.js'
 import userRouter from './route/user.route.js'
 
 app.get('/home', (req, res) => {
@@ -25,6 +26,7 @@ app.get('/home', (req, res) => {
   });
 
 app.use("/api/users", userRouter)
+app.use("/api/friends", friendRouter)
 
 // http://localhost:8000/api/users/register
 

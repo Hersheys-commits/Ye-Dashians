@@ -2,6 +2,7 @@ import mongoose, {Schema} from "mongoose";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
+
 const pictureSchema = new Schema(
     {
         type: {
@@ -50,6 +51,44 @@ const userSchema = new Schema(
         },
         refreshToken: {
             type: String
+        },
+        friends: [{
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        }],
+        friendRequests: {
+            sent: [{
+                recipient: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'User',
+                    required: true
+                },
+                status: {
+                    type: String,
+                    enum: ['pending', 'accepted', 'rejected'],
+                    default: 'pending'
+                },
+                createdAt: {
+                    type: Date,
+                    default: Date.now
+                }
+            }],
+            received: [{
+                requester: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'User',
+                    required: true
+                },
+                status: {
+                    type: String,
+                    enum: ['pending', 'accepted', 'rejected'],
+                    default: 'pending'
+                },
+                createdAt: {
+                    type: Date,
+                    default: Date.now
+                }
+            }]
         }
 
     },
