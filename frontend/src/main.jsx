@@ -1,14 +1,14 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from "./App.jsx"
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import './index.css'
+import App from './App.jsx'
+import store from './store/store.js'
+import { Provider } from 'react-redux'
 
-const container = document.querySelector('#root');
-if (!container) {
-  throw new Error("Target container #app not found");
-}
-const root = createRoot(container);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+createRoot(document.getElementById('root')).render(
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>
+)

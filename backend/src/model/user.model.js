@@ -24,20 +24,19 @@ const userSchema = new Schema(
         },
         email: {
             type: String,
-            required: true,
+            required: [true, 'Email is required'],
             unique: true,
             lowecase: true,
             trim: true, 
         },
         fullName: {
             type: String,
-            required: true,
+            required: [true, 'Full name is required'],
             trim: true, 
             index: true
         },
         age:{
-            type: Number,
-            required: true
+            type: Number
         },
         avatar: {
             type: String, 
