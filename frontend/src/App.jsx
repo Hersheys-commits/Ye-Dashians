@@ -1,18 +1,26 @@
-import { APIProvider, Map } from '@vis.gl/react-google-maps';
+import { useState } from 'react'
 import './App.css'
+import LoginPage from './pages/LoginPage'
+import { Toaster } from 'react-hot-toast'
+import SignupPage from './pages/SignupPage'
+import PageNotFound from './pages/PageNotFound'
+import { Route,Routes } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import MeetingPage from './pages/MeetingPage'
 
 function App() {
 
   return (
-    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAP_API}>
-        <Map
-          style={{ width: '100vw', height: '100vh' }}
-          defaultCenter={{ lat: 22.54992, lng: 0 }}
-          defaultZoom={3}
-          gestureHandling={'greedy'}
-          disableDefaultUI={true}
-        />
-      </APIProvider>
+    <div>
+        <Routes>
+          <Route path="/" element={<HomePage/>}/>
+          <Route path="/login" element={<LoginPage/>}/>
+          <Route path="/signup" element={<SignupPage/>}/>
+          <Route path="/meeting" element={<MeetingPage/>}/>
+          <Route path="*" element={<PageNotFound/>}/>
+        </Routes>
+      <Toaster/>
+    </div>
   )
 }
 

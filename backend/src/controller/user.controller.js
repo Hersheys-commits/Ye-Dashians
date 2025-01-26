@@ -12,9 +12,10 @@ const generateAccessAndRefereshTokens = async(userId) =>{
         const user = await User.findById(userId)
         const accessToken = user.generateAccessToken()
         const refreshToken = user.generateRefreshToken()
-
+        
         user.refreshToken = refreshToken
         await user.save({ validateBeforeSave: false })
+        console.log(user);
 
         return {accessToken, refreshToken}
 
@@ -36,11 +37,11 @@ const registerUser = asyncHandler( async (req, res) => {
     // return res
 
 
-    const {fullName, email,age, username, password } = req.body
+    const {fullName, email, username, password } = req.body
     //console.log("email: ", email);
 
     if (
-        [fullName, email, age, username, password].some(
+        [fullName, email, username, password].some(
             (field) => typeof field === "string" && field.trim() === "" // Only call trim on strings
         )
     ) {
@@ -61,7 +62,6 @@ const registerUser = asyncHandler( async (req, res) => {
 
     const user = await User.create({
         fullName,
-        age,
         email, 
         password,
         username: username.toLowerCase()
@@ -194,9 +194,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             httpOnly: true,
             secure: true
         }
-    
+        
         const {accessToken, newRefreshToken} = await generateAccessAndRefereshTokens(user._id)
-    
+        console.log(user._id);
+        console.log(newRefreshToken);
         return res
         .status(200)
         .cookie("accessToken", accessToken, options)
