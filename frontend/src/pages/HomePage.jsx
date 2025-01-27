@@ -1,13 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { login } from '../store/authSlice';
+import { useDispatch } from 'react-redux';
 
 function HomePage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [suggestions, setSuggestions] = useState([]); // Ensure this is always initialized as an array
+  const token = localStorage.getItem('jwt');
+  const user= useSelector((store)=>store.auth.userInfo)
+  const dispatch = useDispatch();
+  console.log("state",user)
 
+    const dataSave = async () => {
+      try {
+        const response = await axios.get('http://localhost:4001/api/users/profile', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+    
+        // Serialize the JSON object into a string before storing it
+        dispatch(
+          login({
+            user: response.data.data.user, // Pass the user object
+            accessToken: response.data.data.accessToken, // Pass the access token
+          })
+        );
+        localStorage.setItem("user", JSON.stringify(response.data.data));
+        console.log("User data saved to localStorage");
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+    useEffect(()=>{
+      dataSave();
+    },[]);
+    
   const handleUsernameChange = async (e) => {
     const value = e.target.value;
     setUsername(value);

@@ -1,21 +1,32 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../store/authSlice';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const Header = () => {
-  const { isLoggedIn, userInfo } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  const [isLoggedIn, setIsLoggedIn] = useState(useSelector((store)=>store.auth.isLoggedIn));
+  const [userInfo, setUserInfo] = useState(useSelector((store)=>store.auth.userInfo));
   const navigateTo = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    const user = localStorage.getItem("user");
+    
+    if (token && user) {
+      setIsLoggedIn(true);
+      setUserInfo(JSON.parse(user)); // Parse the user data from localStorage
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
-      // Retrieve the token from localStorage
       const token = localStorage.getItem("jwt");
-  
-      // Send the logout request with the token
+      if (!token) {
+        toast.error("No token found for logout.");
+        return;
+      }
+
       await axios.post(
         "http://localhost:4001/api/users/logout",
         {},
@@ -23,26 +34,33 @@ const Header = () => {
           withCredentials: true,
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,  // Add token here
+            "Authorization": `Bearer ${token}`,
           },
         }
       );
-      dispatch(logout());  // Dispatch the logout action to clear the state
+
+      // Clear localStorage and update state
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("user");
+      setIsLoggedIn(false);
+      setUserInfo(null);
+
+      toast.success("Logged out successfully.");
+      navigateTo("/login");
     } catch (error) {
       console.error("Logout failed:", error);
-      toast.error("Failed to logout");
+      toast.error("Failed to logout.");
     }
   };
-  
 
   const clickSignup = () => {
-    toast.success('Redirect to Signup');
-    navigateTo('/signup');
+    toast.success("Redirect to Signup");
+    navigateTo("/signup");
   };
 
   const clickLogin = () => {
-    toast.success('Redirect to Login');
-    navigateTo('/login');
+    toast.success("Redirect to Login");
+    navigateTo("/login");
   };
 
   return (
@@ -54,19 +72,23 @@ const Header = () => {
       <div className="flex items-center space-x-4">
         {!isLoggedIn ? (
           <>
-            <button className="border border-gray-300 px-4 py-2 rounded" onClick={clickSignup}>Sign Up</button>
-            <button className="px-4 py-2 rounded bg-red-500 text-white" onClick={clickLogin}>Login</button>
+            <button className="border border-gray-300 px-4 py-2 rounded" onClick={clickSignup}>
+              Sign Up
+            </button>
+            <button className="px-4 py-2 rounded bg-red-500 text-white" onClick={clickLogin}>
+              Login
+            </button>
           </>
         ) : (
           <div className="relative">
             <button className="flex items-center space-x-2">
-              <span className="font-bold">{userInfo.name}</span>
+              <span className="font-bold">{userInfo?.name || "User"}</span>
             </button>
             <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded">
               <div className="flex flex-col space-y-2 p-2">
                 <button
                   className="text-left p-2 hover:bg-gray-100"
-                  onClick={() => {navigateTo('/user/profile')}}
+                  onClick={() => navigateTo("/user/profile")}
                 >
                   Profile
                 </button>

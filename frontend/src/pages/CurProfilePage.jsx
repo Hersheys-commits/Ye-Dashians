@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function CurrentUserProfilePage() {
+  const user = JSON.parse(localStorage.getItem("user"));
   const [profile, setProfile] = useState({ 
-    user: null 
+    user 
   });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +63,54 @@ function CurrentUserProfilePage() {
     }
   };
 
+  // Handle accepting a friend request
+  const acceptFriendRequest = async (requestId) => {
+    try {
+      const token = localStorage.getItem('jwt');
+      if (!token) {
+        setError('Authorization token is missing!');
+        return;
+      }
+
+      await axios.post(
+        `http://localhost:4001/api/friends/accept-request`,
+        { requestId },
+        {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }
+      );
+
+      // Refetch profile to get updated friends and friend requests
+      fetchCurrentUserProfile();
+    } catch (error) {
+      setError('Failed to accept friend request.');
+    }
+  };
+
+  // Handle rejecting a friend request
+  const rejectFriendRequest = async (requestId) => {
+    try {
+      const token = localStorage.getItem('jwt');
+      if (!token) {
+        setError('Authorization token is missing!');
+        return;
+      }
+
+      await axios.post(
+        `http://localhost:4001/api/friends/reject-request`,
+        { requestId },
+        {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }
+      );
+
+      // Refetch profile to get updated friend requests
+      fetchCurrentUserProfile();
+    } catch (error) {
+      setError('Failed to reject friend request.');
+    }
+  };
+
   // Fetch profile when component mounts
   useEffect(() => {
     fetchCurrentUserProfile();
@@ -109,11 +158,13 @@ function CurrentUserProfilePage() {
                 <span>{request.requester}</span>
                 <div>
                   <button
+                    onClick={() => acceptFriendRequest(request._id)}
                     className="bg-green-500 text-white px-4 py-2 rounded mr-2"
                   >
                     Accept
                   </button>
                   <button
+                    onClick={() => rejectFriendRequest(request._id)}
                     className="bg-red-500 text-white px-4 py-2 rounded"
                   >
                     Reject

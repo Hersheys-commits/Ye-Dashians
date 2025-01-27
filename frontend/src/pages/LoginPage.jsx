@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
-import { login } from '../store/authSlice';
+import { login} from '../store/authSlice';
 
 const LoginPage = () => {
   const {
@@ -29,14 +29,19 @@ const LoginPage = () => {
           },
         }
       );
-      console.log(response);
+      console.log("Login",response);
       toast.success(response.data.message || "User logged in successfully");
 
       // Save the token to localStorage
       localStorage.setItem("jwt", response.data.data.accessToken);
 
       // Dispatch the login action to update the store with user info
-      dispatch(login({ userInfo: response.data.user, token: response.data.token }));
+      dispatch(
+        login({
+          user: response.data.data.user, // Pass the user object
+          accessToken: response.data.data.accessToken, // Pass the access token
+        })
+      );
 
       // Redirect to home page
       navigateTo("/");

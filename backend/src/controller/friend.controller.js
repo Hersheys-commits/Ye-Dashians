@@ -98,18 +98,31 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
     const { username } = req.params;
     const senderId = req.user._id;
 
-    // Find recipient
+    // Find the recipient
     const recipient = await User.findOne({ username });
     if (!recipient) {
         throw new ApiError(404, "Recipient user not found");
     }
+    const recipientId = recipient._id;
 
-    // Check if request already exists
+    // Check if the recipient is already a friend
+    const sender = await User.findById(senderId);
+    const isAlreadyFriend = sender.friends.some(
+        (friendId) => friendId.toString() === recipientId.toString()
+    );
+
+    if (isAlreadyFriend) {
+        return res.status(202).json(
+            new ApiResponse(202, null, "Already friends")
+        );
+    }
+
+    // Check if the friend request already exists
     const existingRequest = await User.findOne({
         _id: senderId,
         'friendRequests.sent': {
             $elemMatch: {
-                recipient: recipient._id,
+                recipient: recipientId,
                 status: { $in: ['pending', 'accepted'] }
             }
         }
@@ -119,17 +132,18 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Friend request already sent");
     }
 
-    // Create friend request
+    // Add the friend request to the sender's "sent" list
     await User.findByIdAndUpdate(senderId, {
         $push: {
             'friendRequests.sent': {
-                recipient: recipient._id,
+                recipient: recipientId,
                 status: 'pending'
             }
         }
     });
 
-    await User.findByIdAndUpdate(recipient._id, {
+    // Add the friend request to the recipient's "received" list
+    await User.findByIdAndUpdate(recipientId, {
         $push: {
             'friendRequests.received': {
                 requester: senderId,
@@ -138,10 +152,12 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
         }
     });
 
+    // Respond with success
     return res.status(201).json(
         new ApiResponse(201, null, "Friend request sent successfully")
     );
 });
+
 
 // Accept friend request
 export const acceptFriendRequest = asyncHandler(async (req, res) => {
@@ -172,6 +188,7 @@ export const acceptFriendRequest = asyncHandler(async (req, res) => {
         $addToSet: { friends: requestDetails.requester },
         $pull: { 'friendRequests.received': { _id: requestId } }
     });
+
 
     // Update requester's profile
     await User.findByIdAndUpdate(requestDetails.requester, {

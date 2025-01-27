@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 function UserProfilePage() {
   const { username } = useParams();
   const [profile, setProfile] = useState(null);
   const [friendRequestStatus, setFriendRequestStatus] = useState('not_sent');
   const [error, setError] = useState(null);
+
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -17,19 +20,14 @@ function UserProfilePage() {
           return;
         }
 
-        // Add a timeout to handle slow API responses
         const response = await axios.get(`http://localhost:4001/api/friends/profile/${username}`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
-          timeout: 5000, // 5 seconds timeout
+          timeout: 5000,
         });
 
-        // Log full response to understand its structure
-        console.log('Full API Response:', response.data);
-
-        // Check for missing or undefined response structure
-        if (!response.data.data || !response.data.data) {
+        if (!response.data.data || !response.data.data.user) {
           setError('Profile data is not available.');
           return;
         }
@@ -39,7 +37,6 @@ function UserProfilePage() {
 
         const requestStatus = response.data.data.friendRequestStatus || 'not_sent';
         setFriendRequestStatus(requestStatus);
-
       } catch (error) {
         console.error('Error fetching profile:', error);
         setError(error.message || 'An error occurred while fetching the profile.');
@@ -55,17 +52,15 @@ function UserProfilePage() {
         `http://localhost:4001/api/friends/friend-request/${username}`,
         {},
         {
-          headers: { 
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}` 
-          }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+          },
         }
       );
 
-      // Log response for debugging
-      console.log('Friend Request Response:', response.data);
-
-      // Update the friend request status
-      if (response.data.success) {
+      if (response.data.message === 'Already friends' || response.data.statusCode === 202) {
+        setFriendRequestStatus('accepted');
+      } else if (response.data.success) {
         setFriendRequestStatus('sent');
       }
     } catch (error) {
@@ -75,9 +70,28 @@ function UserProfilePage() {
   };
 
   if (error) return <div>Error: {error}</div>;
-  if (!profile) return <div>Loading...</div>; // Ensure we handle loading state
+  if (!profile) return <div>Loading...</div>;
 
   const renderFriendRequestButton = () => {
+    // Don't show the friend request button if the user is viewing their own profile
+    if (username === user.user.username) {
+      return null;
+    }
+
+    // Check if the user is already in the friends list
+    const isFriend = profile.friends && profile.friends.length > 0;
+
+    if (isFriend) {
+      return (
+        <button
+          disabled
+          className="bg-green-500 text-white px-4 py-2 rounded cursor-not-allowed"
+        >
+          Already Friends
+        </button>
+      );
+    }
+
     switch (friendRequestStatus) {
       case 'not_sent':
         return (
@@ -100,7 +114,7 @@ function UserProfilePage() {
       case 'accepted':
         return (
           <button
-            disabled
+            onClick={() => toast.success('Friends already!!!')}
             className="bg-green-500 text-white px-4 py-2 rounded"
           >
             Friends
