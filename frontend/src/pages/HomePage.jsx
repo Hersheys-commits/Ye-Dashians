@@ -5,20 +5,24 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { login } from '../store/authSlice';
 import { useDispatch } from 'react-redux';
+import Cookies from 'js-cookie'
 
 function HomePage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [suggestions, setSuggestions] = useState([]); // Ensure this is always initialized as an array
   const token = localStorage.getItem('jwt');
-  const user= useSelector((store)=>store.auth.userInfo)
+  const accessToken = Cookies.get('accessToken');
+  console.log('cookie',accessToken);
+  
+  const user= useSelector((store)=>store.auth.isLoggedIn)
   const dispatch = useDispatch();
   console.log("state",user)
 
     const dataSave = async () => {
       try {
-        const response = await axios.get('http://localhost:4001/api/users/profile', {
-          headers: { 'Authorization': `Bearer ${token}` },
+        const response = await axios.get('http://localhost:4001/api/users/profile',{
+          withCredentials: true,
         });
     
         // Serialize the JSON object into a string before storing it
@@ -36,7 +40,7 @@ function HomePage() {
     };
     useEffect(()=>{
       dataSave();
-    },[]);
+    },[]);  
     
   const handleUsernameChange = async (e) => {
     const value = e.target.value;
@@ -45,9 +49,7 @@ function HomePage() {
     if (value.length > 2) {
       try {
         const response = await axios.get(`/api/users/search?query=${value}`, {
-          headers: { 
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}` 
-          }
+          withCredentials:true,
         });
         setSuggestions(response.data.data || []); // Ensure response data defaults to an empty array
       } catch (error) {

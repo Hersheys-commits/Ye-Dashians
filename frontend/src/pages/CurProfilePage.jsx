@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 function CurrentUserProfilePage() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = useSelector((store)=>{store.userInfo});
   const [profile, setProfile] = useState({ 
     user 
   });
@@ -12,15 +13,15 @@ function CurrentUserProfilePage() {
   // Fetch current user profile
   const fetchCurrentUserProfile = async () => {
     try {
-      const token = localStorage.getItem('jwt');
-      if (!token) {
-        setError('Authorization token is missing!');
-        setIsLoading(false);
-        return;
-      }
+      // const token = localStorage.getItem('jwt');
+      // if (!token) {
+      //   setError('Authorization token is missing!');
+      //   setIsLoading(false);
+      //   return;
+      // }
 
       const response = await axios.get('http://localhost:4001/api/users/profile', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        withCredentials:true,
       });
 
       setProfile(response.data.data);
@@ -34,17 +35,17 @@ function CurrentUserProfilePage() {
   // Handle removing a friend
   const removeFriend = async (friendId) => {
     try {
-      const token = localStorage.getItem('jwt');
-      if (!token) {
-        setError('Authorization token is missing!');
-        return;
-      }
+      // const token = localStorage.getItem('jwt');
+      // if (!token) {
+      //   setError('Authorization token is missing!');
+      //   return;
+      // }
 
       await axios.post(
         `http://localhost:4001/api/friends/remove-friend`,
         { friendId },
         {
-          headers: { 'Authorization': `Bearer ${token}` },
+          withCredentials:true,
         }
       );
 
@@ -66,17 +67,17 @@ function CurrentUserProfilePage() {
   // Handle accepting a friend request
   const acceptFriendRequest = async (requestId) => {
     try {
-      const token = localStorage.getItem('jwt');
-      if (!token) {
-        setError('Authorization token is missing!');
-        return;
-      }
+      // const token = localStorage.getItem('jwt');
+      // if (!token) {
+      //   setError('Authorization token is missing!');
+      //   return;
+      // }
 
       await axios.post(
         `http://localhost:4001/api/friends/accept-request`,
         { requestId },
         {
-          headers: { 'Authorization': `Bearer ${token}` },
+          withCredentials:true,
         }
       );
 
@@ -90,20 +91,20 @@ function CurrentUserProfilePage() {
   // Handle rejecting a friend request
   const rejectFriendRequest = async (requestId) => {
     try {
-      const token = localStorage.getItem('jwt');
-      if (!token) {
-        setError('Authorization token is missing!');
-        return;
-      }
+      // const token = localStorage.getItem('jwt');
+      // if (!token) {
+      //   setError('Authorization token is missing!');
+      //   return;
+      // }
 
-      await axios.post(
+      const res=await axios.post(
         `http://localhost:4001/api/friends/reject-request`,
         { requestId },
         {
-          headers: { 'Authorization': `Bearer ${token}` },
+          withCredentials:true,
         }
       );
-
+      console.log(res)
       // Refetch profile to get updated friend requests
       fetchCurrentUserProfile();
     } catch (error) {

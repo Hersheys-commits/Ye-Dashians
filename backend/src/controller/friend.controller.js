@@ -292,3 +292,67 @@ export const getCurrentUserProfile = asyncHandler(async (req, res) => {
 });
 
 
+
+// Add this to your user.controller.js
+// In your friend.controller.js, update the cancelFriendRequest controller
+
+export const cancelFriendRequest = asyncHandler(async (req, res) => {
+    const { username } = req.params;
+    const senderId = req.user._id;
+
+    // Find the recipient
+    const recipient = await User.findOne({ username });
+    if (!recipient) {
+        throw new ApiError(404, "Recipient user not found");
+    }
+    const recipientId = recipient._id;
+
+    // Find and verify the existing request
+    const existingRequest = await User.findOne({
+        _id: senderId,
+        'friendRequests.sent': {
+            $elemMatch: {
+                recipient: recipientId,
+                status: 'pending'
+            }
+        }
+    });
+
+    if (!existingRequest) {
+        throw new ApiError(404, "No pending friend request found");
+    }
+
+    // Remove the friend request from sender's "sent" list
+    await User.findByIdAndUpdate(
+        senderId,
+        {
+            $pull: {
+                'friendRequests.sent': {
+                    recipient: recipientId,
+                    status: 'pending'
+                }
+            }
+        }
+    );
+
+    // Remove the friend request from recipient's "received" list
+    await User.findByIdAndUpdate(
+        recipientId,
+        {
+            $pull: {
+                'friendRequests.received': {
+                    requester: senderId,
+                    status: 'pending'
+                }
+            }
+        }
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200, 
+            null, 
+            "Friend request cancelled successfully"
+        )
+    );
+});

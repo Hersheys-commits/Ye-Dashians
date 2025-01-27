@@ -120,7 +120,7 @@ const loginUser = asyncHandler(async (req, res) =>{
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
     const options = {
-        httpOnly: true,
+        // httpOnly: true,
         secure: true
     }
 
@@ -145,7 +145,8 @@ const logoutUser = asyncHandler(async(req, res) => {
         req.user._id,
         {
             $unset: {
-                refreshToken: 1 // this removes the field from document
+                refreshToken: 1,
+                // accessToken:1 // this removes the field from document
             }
         },
         {

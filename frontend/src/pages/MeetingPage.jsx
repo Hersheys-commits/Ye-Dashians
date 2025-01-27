@@ -2,10 +2,14 @@ import React, { useEffect, useState, useRef } from 'react';
 import { GoogleMap, Marker, useLoadScript, Autocomplete } from '@react-google-maps/api';
 import Header from '../components/Header';
 
+// Move these outside the component to prevent recreating on each render
 const mapContainerStyle = {
   width: '100%',
   height: '100%',
 };
+
+// Define libraries array outside component to maintain consistent reference
+const libraries = ['places'];
 
 function MeetingPage() {
   const [currentLocation, setCurrentLocation] = useState({ lat: 0, lng: 0 });
@@ -25,7 +29,7 @@ function MeetingPage() {
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_API,
-    libraries: ['places'],
+    libraries, // Use the constant libraries array
   });
 
   // Existing location and map center logic remains the same...

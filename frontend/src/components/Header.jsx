@@ -1,50 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../store/authSlice';
 
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(useSelector((store)=>store.auth.isLoggedIn));
-  const [userInfo, setUserInfo] = useState(useSelector((store)=>store.auth.userInfo));
   const navigateTo = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    const user = localStorage.getItem("user");
-    
-    if (token && user) {
-      setIsLoggedIn(true);
-      setUserInfo(JSON.parse(user)); // Parse the user data from localStorage
-    }
-  }, []);
+  const dispatch = useDispatch();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  const { isLoggedIn, userInfo } = useSelector((store) => store.auth);
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("jwt");
-      if (!token) {
-        toast.error("No token found for logout.");
-        return;
-      }
-
       await axios.post(
         "http://localhost:4001/api/users/logout",
         {},
         {
           withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
         }
       );
 
-      // Clear localStorage and update state
-      localStorage.removeItem("jwt");
+      dispatch(logout());
       localStorage.removeItem("user");
-      setIsLoggedIn(false);
-      setUserInfo(null);
-
+      setIsDropdownOpen(false);
+      
       toast.success("Logged out successfully.");
       navigateTo("/login");
     } catch (error) {
@@ -63,43 +44,87 @@ const Header = () => {
     navigateTo("/login");
   };
 
+  if (typeof isLoggedIn === 'undefined') {
+    return (
+      <header className="flex justify-between items-center p-4 bg-white shadow-md">
+        <div className="text-xl font-bold text-red-500">YeDashians</div>
+        <div className="w-24 h-8 bg-gray-200 animate-pulse rounded"></div>
+      </header>
+    );
+  }
+
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
       {/* Logo */}
-      <div className="text-xl font-bold text-red-500">YeDashians</div>
+      <div className="text-xl font-bold text-red-500 cursor-pointer" onClick={() => navigateTo('/')}>
+        YeDashians
+      </div>
 
       {/* Actions */}
       <div className="flex items-center space-x-4">
         {!isLoggedIn ? (
           <>
-            <button className="border border-gray-300 px-4 py-2 rounded" onClick={clickSignup}>
+            <button 
+              className="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition-colors" 
+              onClick={clickSignup}
+            >
               Sign Up
             </button>
-            <button className="px-4 py-2 rounded bg-red-500 text-white" onClick={clickLogin}>
+            <button 
+              className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 transition-colors" 
+              onClick={clickLogin}
+            >
               Login
             </button>
           </>
         ) : (
           <div className="relative">
-            <button className="flex items-center space-x-2">
+            <button 
+              className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
               <span className="font-bold">{userInfo?.name || "User"}</span>
+              {/* Optional: Add a dropdown arrow */}
+              <svg 
+                className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
-            <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded">
-              <div className="flex flex-col space-y-2 p-2">
-                <button
-                  className="text-left p-2 hover:bg-gray-100"
-                  onClick={() => navigateTo("/user/profile")}
-                >
-                  Profile
-                </button>
-                <button
-                  className="text-left p-2 text-red-500 hover:bg-gray-100"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
+            
+            {isDropdownOpen && (
+              <>
+                {/* Invisible overlay to handle clicking outside */}
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setIsDropdownOpen(false)}
+                />
+                
+                {/* Dropdown menu */}
+                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md overflow-hidden z-20">
+                  <div className="py-1">
+                    <button
+                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => {
+                        navigateTo("/user/profile");
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      Profile
+                    </button>
+                    <button
+                      className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100 transition-colors"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
