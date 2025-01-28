@@ -20,6 +20,7 @@ app.use(cookieParser())
 //routes import
 import friendRouter from './route/friend.route.js'
 import userRouter from './route/user.route.js'
+import messageRoutes from './route/message.route.js'
 
 app.get('/home', (req, res) => {
     res.send('Welocome to home page!!!!!');
@@ -27,6 +28,7 @@ app.get('/home', (req, res) => {
 
 app.use("/api/users", userRouter)
 app.use("/api/friends", friendRouter)
+app.use("/api/message", messageRoutes);
 
 // http://localhost:8000/api/users/register
 

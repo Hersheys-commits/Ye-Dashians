@@ -1,33 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 function CurrentUserProfilePage() {
-  const user = useSelector((store)=>{store.userInfo});
-  const [profile, setProfile] = useState({ 
-    user 
-  });
+  const user = useSelector((store) => store.userInfo);
+  const [profile, setProfile] = useState({ user });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch current user profile
   const fetchCurrentUserProfile = async () => {
     try {
-      // const token = localStorage.getItem('jwt');
-      // if (!token) {
-      //   setError('Authorization token is missing!');
-      //   setIsLoading(false);
-      //   return;
-      // }
-
-      const response = await axios.get('http://localhost:4001/api/users/profile', {
-        withCredentials:true,
-      });
+      const response = await axios.get(
+        "http://localhost:4001/api/users/profile",
+        {
+          withCredentials: true,
+        }
+      );
 
       setProfile(response.data.data);
       setIsLoading(false);
     } catch (error) {
-      setError('Failed to fetch profile.');
+      setError("Failed to fetch profile.");
       setIsLoading(false);
     }
   };
@@ -35,80 +29,59 @@ function CurrentUserProfilePage() {
   // Handle removing a friend
   const removeFriend = async (friendId) => {
     try {
-      // const token = localStorage.getItem('jwt');
-      // if (!token) {
-      //   setError('Authorization token is missing!');
-      //   return;
-      // }
-
       await axios.post(
         `http://localhost:4001/api/friends/remove-friend`,
         { friendId },
         {
-          withCredentials:true,
+          withCredentials: true,
         }
       );
 
-      // Update the friends list by filtering out the removed friend
-      setProfile(prevProfile => ({
+      setProfile((prevProfile) => ({
         ...prevProfile,
         user: {
           ...prevProfile.user,
           friends: prevProfile.user.friends.filter(
-            (friend) => friend !== friendId
-          )
-        }
+            (friend) => friend.userId !== friendId
+          ),
+        },
       }));
     } catch (error) {
-      setError('Failed to remove friend.');
+      setError("Failed to remove friend.");
     }
   };
 
   // Handle accepting a friend request
   const acceptFriendRequest = async (requestId) => {
     try {
-      // const token = localStorage.getItem('jwt');
-      // if (!token) {
-      //   setError('Authorization token is missing!');
-      //   return;
-      // }
-
       await axios.post(
         `http://localhost:4001/api/friends/accept-request`,
         { requestId },
         {
-          withCredentials:true,
+          withCredentials: true,
         }
       );
 
-      // Refetch profile to get updated friends and friend requests
       fetchCurrentUserProfile();
     } catch (error) {
-      setError('Failed to accept friend request.');
+      setError("Failed to accept friend request.");
     }
   };
 
   // Handle rejecting a friend request
   const rejectFriendRequest = async (requestId) => {
     try {
-      // const token = localStorage.getItem('jwt');
-      // if (!token) {
-      //   setError('Authorization token is missing!');
-      //   return;
-      // }
-
-      const res=await axios.post(
+      await axios.post(
         `http://localhost:4001/api/friends/reject-request`,
         { requestId },
         {
-          withCredentials:true,
+          withCredentials: true,
         }
       );
-      console.log(res)
-      // Refetch profile to get updated friend requests
+
       fetchCurrentUserProfile();
     } catch (error) {
-      setError('Failed to reject friend request.');
+      setError("Failed to reject friend request.");
     }
   };
 
@@ -134,11 +107,11 @@ function CurrentUserProfilePage() {
         <h2 className="text-lg font-bold mt-6">Friends</h2>
         {profile.user.friends && profile.user.friends.length > 0 ? (
           <ul>
-            {profile.user.friends.map((friendId) => (
-              <li key={friendId} className="flex justify-between mb-2">
-                <span>{friendId}</span>
+            {profile.user.friends.map((friend) => (
+              <li key={friend.userId} className="flex justify-between mb-2">
+                <span>@{friend.username}</span>
                 <button
-                  onClick={() => removeFriend(friendId)}
+                  onClick={() => removeFriend(friend.userId)}
                   className="bg-red-500 text-white px-4 py-1 rounded text-sm"
                 >
                   Remove
@@ -152,11 +125,12 @@ function CurrentUserProfilePage() {
 
         {/* Friend requests */}
         <h2 className="text-lg font-bold mt-6">Friend Requests</h2>
-        {profile.user.friendRequests?.received && profile.user.friendRequests.received.length > 0 ? (
+        {profile.user.friendRequests?.received &&
+        profile.user.friendRequests.received.length > 0 ? (
           <ul>
             {profile.user.friendRequests.received.map((request) => (
               <li key={request._id} className="flex justify-between mb-4">
-                <span>{request.requester}</span>
+                <span>@{request.requester.username}</span>
                 <div>
                   <button
                     onClick={() => acceptFriendRequest(request._id)}

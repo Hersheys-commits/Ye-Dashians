@@ -53,15 +53,28 @@ const userSchema = new Schema(
             type: String
         },
         friends: [{
-            type: Schema.Types.ObjectId,
-            ref: 'User'
+            userId: {
+                type: Schema.Types.ObjectId,
+                ref: 'User',
+                required: true
+            },
+            username: {
+                type: String,
+                required: true
+            },
         }],
         friendRequests: {
             sent: [{
                 recipient: {
-                    type: Schema.Types.ObjectId,
-                    ref: 'User',
-                    required: true
+                    userId: {
+                        type: Schema.Types.ObjectId,
+                        ref: 'User',
+                        required: true
+                    },
+                    username: {
+                        type: String,
+                        required: true
+                    }
                 },
                 status: {
                     type: String,
@@ -75,9 +88,15 @@ const userSchema = new Schema(
             }],
             received: [{
                 requester: {
-                    type: Schema.Types.ObjectId,
-                    ref: 'User',
-                    required: true
+                    userId: {
+                        type: Schema.Types.ObjectId,
+                        ref: 'User',
+                        required: true
+                    },
+                    username: {
+                        type: String,
+                        required: true
+                    }
                 },
                 status: {
                     type: String,
@@ -135,4 +154,6 @@ userSchema.methods.generateRefreshToken = function(){
     )
 }
 
-export const User = mongoose.model("User", userSchema)
+const User = mongoose.model("User", userSchema)
+
+export default User

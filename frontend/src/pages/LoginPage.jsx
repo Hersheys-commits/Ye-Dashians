@@ -29,7 +29,7 @@ const LoginPage = () => {
           },
         }
       );
-      console.log("Login",response);
+      // console.log("Login",response);
       toast.success(response.data.message || "User logged in successfully");
 
       // Save the token to localStorage

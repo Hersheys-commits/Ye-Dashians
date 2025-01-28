@@ -1,4 +1,4 @@
-import { User } from '../model/user.model.js';
+import  User  from '../model/user.model.js';
 import { ApiError } from '../util/ApiError.js';
 import { ApiResponse } from '../util/ApiResponse.js';
 import { asyncHandler } from '../util/asyncHandler.js';
@@ -17,9 +17,9 @@ export const searchUsers = asyncHandler(async (req, res) => {
     const users = await User.find({
         username: { 
             $regex: query, 
-            $options: 'i' // case-insensitive
+            $options: 'i'
         }
-    }).select('username fullName avatar');
+    }).select('username fullName avatar email');
 
     return res.status(200).json(
         new ApiResponse(200, users, "Users found successfully")
@@ -32,18 +32,17 @@ export const getUserProfile = asyncHandler(async (req, res) => {
     const currentUserId = req.user._id;
 
     const user = await User.findOne({ username })
-        .select('username fullName avatar');
+        .select('username fullName avatar email');
 
     if (!user) {
         throw new ApiError(404, "User not found");
     }
 
-    // Check existing friend request status
     const existingRequest = await User.findOne({
         _id: currentUserId,
         'friendRequests.sent': {
             $elemMatch: {
-                recipient: user._id,
+                'recipient.userId': user._id,
                 status: { $in: ['pending', 'accepted'] }
             }
         }
@@ -59,18 +58,17 @@ export const getUserProfile = asyncHandler(async (req, res) => {
     );
 });
 
+
 export const getUserProfileById = asyncHandler(async (req, res) => {
-    const { id } = req.params; // Get userId from request params
+    const { id } = req.params;
     const currentUserId = req.user._id;
 
-    // Find the user by userId and select only relevant fields
     const user = await User.findById(id).select('username fullName avatar');
 
     if (!user) {
         throw new ApiError(404, "User not found");
     }
 
-    // Check if a friend request has already been sent or accepted
     const existingRequest = await User.findOne({
         _id: currentUserId,
         'friendRequests.sent': {
@@ -91,24 +89,18 @@ export const getUserProfileById = asyncHandler(async (req, res) => {
     );
 });
 
-
-// Send friend request
 // Send friend request
 export const sendFriendRequest = asyncHandler(async (req, res) => {
     const { username } = req.params;
-    const senderId = req.user._id;
+    const sender = await User.findById(req.user._id);
 
-    // Find the recipient
     const recipient = await User.findOne({ username });
     if (!recipient) {
         throw new ApiError(404, "Recipient user not found");
     }
-    const recipientId = recipient._id;
 
-    // Check if the recipient is already a friend
-    const sender = await User.findById(senderId);
     const isAlreadyFriend = sender.friends.some(
-        (friendId) => friendId.toString() === recipientId.toString()
+        (friend) => friend.userId.toString() === recipient._id.toString()
     );
 
     if (isAlreadyFriend) {
@@ -117,12 +109,11 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
         );
     }
 
-    // Check if the friend request already exists
     const existingRequest = await User.findOne({
-        _id: senderId,
+        _id: sender._id,
         'friendRequests.sent': {
             $elemMatch: {
-                recipient: recipientId,
+                'recipient.userId': recipient._id,
                 status: { $in: ['pending', 'accepted'] }
             }
         }
@@ -132,39 +123,41 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Friend request already sent");
     }
 
-    // Add the friend request to the sender's "sent" list
-    await User.findByIdAndUpdate(senderId, {
+    await User.findByIdAndUpdate(sender._id, {
         $push: {
             'friendRequests.sent': {
-                recipient: recipientId,
+                recipient: {
+                    userId: recipient._id,
+                    username: recipient.username
+                },
                 status: 'pending'
             }
         }
     });
 
-    // Add the friend request to the recipient's "received" list
-    await User.findByIdAndUpdate(recipientId, {
+    await User.findByIdAndUpdate(recipient._id, {
         $push: {
             'friendRequests.received': {
-                requester: senderId,
+                requester: {
+                    userId: sender._id,
+                    username: sender.username,
+                    email: sender.email
+                },
                 status: 'pending'
             }
         }
     });
 
-    // Respond with success
     return res.status(201).json(
         new ApiResponse(201, null, "Friend request sent successfully")
     );
 });
-
 
 // Accept friend request
 export const acceptFriendRequest = asyncHandler(async (req, res) => {
     const { requestId } = req.body;
     const recipientId = req.user._id;
 
-    // Find the specific friend request
     const recipient = await User.findOne({ 
         _id: recipientId, 
         'friendRequests.received._id': requestId 
@@ -174,7 +167,6 @@ export const acceptFriendRequest = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Friend request not found");
     }
 
-    // Find the specific request details
     const requestDetails = recipient.friendRequests.received.find(
         request => request._id.toString() === requestId
     );
@@ -183,17 +175,31 @@ export const acceptFriendRequest = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Friend request details not found");
     }
 
+    const requester = await User.findById(requestDetails.requester.userId);
+    if (!requester) {
+        throw new ApiError(404, "Requester not found");
+    }
+
     // Update recipient's profile
     await User.findByIdAndUpdate(recipientId, {
-        $addToSet: { friends: requestDetails.requester },
+        $push: { 
+            friends: {
+                userId: requestDetails.requester.userId,
+                username: requestDetails.requester.username
+            }
+        },
         $pull: { 'friendRequests.received': { _id: requestId } }
     });
 
-
     // Update requester's profile
-    await User.findByIdAndUpdate(requestDetails.requester, {
-        $addToSet: { friends: recipientId },
-        $pull: { 'friendRequests.sent': { recipient: recipientId } }
+    await User.findByIdAndUpdate(requestDetails.requester.userId, {
+        $push: { 
+            friends: {
+                userId: recipientId,
+                username: recipient.username
+            }
+        },
+        $pull: { 'friendRequests.sent': { 'recipient.userId': recipientId } }
     });
 
     return res.status(200).json(
@@ -206,7 +212,6 @@ export const rejectFriendRequest = asyncHandler(async (req, res) => {
     const { requestId } = req.body;
     const recipientId = req.user._id;
 
-    // Update recipient's received requests
     const updatedRecipient = await User.findOneAndUpdate(
         {
             _id: recipientId,
@@ -221,14 +226,12 @@ export const rejectFriendRequest = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Friend request not found");
     }
 
-    // Find the request details
     const requestDetails = updatedRecipient.friendRequests.received.find(
         request => request._id.toString() === requestId
     );
 
-    // Update requester's sent requests
-    await User.findByIdAndUpdate(requestDetails.requester, {
-        $pull: { 'friendRequests.sent': { recipient: recipientId } }
+    await User.findByIdAndUpdate(requestDetails.requester.userId, {
+        $pull: { 'friendRequests.sent': { 'recipient.userId': recipientId } }
     });
 
     return res.status(200).json(
@@ -236,43 +239,63 @@ export const rejectFriendRequest = asyncHandler(async (req, res) => {
     );
 });
 
+// Cancel friend request
+export const cancelFriendRequest = asyncHandler(async (req, res) => {
+    const { username } = req.params;
+    const senderId = req.user._id;
 
-// Remove a friend
-export const removeFriend = asyncHandler(async (req, res) => {
-    const { friendId } = req.body;
-    const currentUserId = req.user._id;
-
-    // Validate friendId
-    if (!mongoose.Types.ObjectId.isValid(friendId)) {
-        throw new ApiError(400, "Invalid friend ID");
+    const recipient = await User.findOne({ username });
+    if (!recipient) {
+        throw new ApiError(404, "Recipient user not found");
     }
 
-    // Check if the friend exists in current user's friends list
-    const currentUser = await User.findById(currentUserId);
-    if (!currentUser || !currentUser.friends.includes(friendId)) {
-        throw new ApiError(404, "Friend not found in your friends list");
+    const existingRequest = await User.findOne({
+        _id: senderId,
+        'friendRequests.sent': {
+            $elemMatch: {
+                'recipient.userId': recipient._id,
+                status: 'pending'
+            }
+        }
+    });
+
+    if (!existingRequest) {
+        throw new ApiError(404, "No pending friend request found");
     }
 
-    // Remove friend from current user's friends list
-    await User.findByIdAndUpdate(currentUserId, { 
-        $pull: { friends: friendId } 
-    });
+    await User.findByIdAndUpdate(
+        senderId,
+        {
+            $pull: {
+                'friendRequests.sent': {
+                    'recipient.userId': recipient._id,
+                    status: 'pending'
+                }
+            }
+        }
+    );
 
-    // Remove current user from friend's friends list
-    await User.findByIdAndUpdate(friendId, { 
-        $pull: { friends: currentUserId } 
-    });
+    await User.findByIdAndUpdate(
+        recipient._id,
+        {
+            $pull: {
+                'friendRequests.received': {
+                    'requester.userId': senderId,
+                    status: 'pending'
+                }
+            }
+        }
+    );
 
     return res.status(200).json(
-        new ApiResponse(200, null, "Friend removed successfully")
+        new ApiResponse(200, null, "Friend request cancelled successfully")
     );
 });
 
-// Get current user profile with friends and received friend requests
+// Get current user profile
 export const getCurrentUserProfile = asyncHandler(async (req, res) => {
     const currentUserId = req.user._id;
 
-    // Fetch user profile including friends and received requests
     const user = await User.findById(currentUserId)
         .select('username fullName email avatar friends friendRequests.received');
 
@@ -280,7 +303,6 @@ export const getCurrentUserProfile = asyncHandler(async (req, res) => {
         throw new ApiError(404, "User not found");
     }
 
-    // Return profile details
     const profileResponse = {
         user,
         friendRequests: user.friendRequests.received.filter(request => request.status === 'pending')
@@ -291,68 +313,32 @@ export const getCurrentUserProfile = asyncHandler(async (req, res) => {
     );
 });
 
+// Remove a friend
+export const removeFriend = asyncHandler(async (req, res) => {
+    const { friendId } = req.body;
+    const currentUserId = req.user._id;
 
-
-// Add this to your user.controller.js
-// In your friend.controller.js, update the cancelFriendRequest controller
-
-export const cancelFriendRequest = asyncHandler(async (req, res) => {
-    const { username } = req.params;
-    const senderId = req.user._id;
-
-    // Find the recipient
-    const recipient = await User.findOne({ username });
-    if (!recipient) {
-        throw new ApiError(404, "Recipient user not found");
+    if (!mongoose.Types.ObjectId.isValid(friendId)) {
+        throw new ApiError(400, "Invalid friend ID");
     }
-    const recipientId = recipient._id;
 
-    // Find and verify the existing request
-    const existingRequest = await User.findOne({
-        _id: senderId,
-        'friendRequests.sent': {
-            $elemMatch: {
-                recipient: recipientId,
-                status: 'pending'
-            }
-        }
+    // Check if the friend exists in current user's friends list
+    const currentUser = await User.findById(currentUserId);
+    if (!currentUser || !currentUser.friends.some(friend => friend.userId.toString() === friendId)) {
+        throw new ApiError(404, "Friend not found in your friends list");
+    }
+
+    // Remove friend from current user's friends list
+    await User.findByIdAndUpdate(currentUserId, { 
+        $pull: { friends: { userId: friendId } } 
     });
 
-    if (!existingRequest) {
-        throw new ApiError(404, "No pending friend request found");
-    }
-
-    // Remove the friend request from sender's "sent" list
-    await User.findByIdAndUpdate(
-        senderId,
-        {
-            $pull: {
-                'friendRequests.sent': {
-                    recipient: recipientId,
-                    status: 'pending'
-                }
-            }
-        }
-    );
-
-    // Remove the friend request from recipient's "received" list
-    await User.findByIdAndUpdate(
-        recipientId,
-        {
-            $pull: {
-                'friendRequests.received': {
-                    requester: senderId,
-                    status: 'pending'
-                }
-            }
-        }
-    );
+    // Remove current user from friend's friends list
+    await User.findByIdAndUpdate(friendId, { 
+        $pull: { friends: { userId: currentUserId } } 
+    });
 
     return res.status(200).json(
-        new ApiResponse(
-            200, 
-            null, 
-            "Friend request cancelled successfully"
-        )
+        new ApiResponse(200, null, "Friend removed successfully")
     );
 });
