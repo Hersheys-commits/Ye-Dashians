@@ -7,17 +7,32 @@ import { ApiResponse } from "../util/ApiResponse.js";
 
 
 //not to be used now
+
 export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("fullName email _id");
 
-    res.status(200).json(filteredUsers);
+    // Find the logged in user and populate the friends' user details.
+    const user = await User.findById(loggedInUserId)
+      .populate("friends.userId", "fullName email _id")
+      .select("friends");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Map the populated friend objects to extract the friend details.
+    // After population, each friend in user.friends will have the full user details in friend.userId.
+    const friends = user.friends.map((friend) => friend.userId);
+
+    res.status(200).json(friends);
   } catch (error) {
-    console.error("Error in getUsersForSidebar: ", error.message);
-    throw new ApiError(500, "Internal server error")
+    console.error("Error in getFriendsForSidebar:", error.message);
+    // Adjust your error handling as needed
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export const getMessages = async (req, res) => {
   try {
