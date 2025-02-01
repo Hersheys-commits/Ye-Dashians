@@ -1,14 +1,14 @@
-import React from 'react'
+import React from "react";
 import { IoSend } from "react-icons/io5";
-import useSendMessage from '../../../hooks/useSendMessage';
-import { useForm } from 'react-hook-form';
+import useSendMessage from "../../../hooks/useSendMessage";
+import { useForm } from "react-hook-form";
 
 function Sendtext() {
     const { sendMessageLoading, sendMessage } = useSendMessage();
     const { register, handleSubmit, reset } = useForm();
 
     const onSubmit = async (data) => {
-        if(data.message=="")return;
+        if (data.message == "") return;
         await sendMessage(data.message);
         reset(); // This clears the form
     };
@@ -34,4 +34,4 @@ function Sendtext() {
     );
 }
 
-export default Sendtext
+export default Sendtext;
