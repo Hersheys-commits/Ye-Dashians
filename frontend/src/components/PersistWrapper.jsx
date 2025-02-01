@@ -8,7 +8,7 @@ function PersistWrapper({ children }) {
   const auth = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // Wait for a brief moment to ensure redux is rehydrated
+    // Wait for a braief moment to ensure redux is rehydrated
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 100);

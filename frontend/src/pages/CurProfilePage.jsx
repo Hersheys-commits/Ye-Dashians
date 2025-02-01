@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import toast from 'react-hot-toast';
+import Header from "../components/Header";
 
 function CurrentUserProfilePage() {
   const user = useSelector((store) => store.userInfo);
@@ -8,7 +10,6 @@ function CurrentUserProfilePage() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch current user profile
   const fetchCurrentUserProfile = async () => {
     try {
       const response = await axios.get(
@@ -23,10 +24,10 @@ function CurrentUserProfilePage() {
     } catch (error) {
       setError("Failed to fetch profile.");
       setIsLoading(false);
+      toast.error("Failed to fetch profile.");
     }
   };
 
-  // Handle removing a friend
   const removeFriend = async (friendId) => {
     try {
       await axios.post(
@@ -46,12 +47,13 @@ function CurrentUserProfilePage() {
           ),
         },
       }));
+      
+      toast.success("Friend removed successfully.");
     } catch (error) {
-      setError("Failed to remove friend.");
+      toast.error("Failed to remove friend.");
     }
   };
 
-  // Handle accepting a friend request
   const acceptFriendRequest = async (requestId) => {
     try {
       await axios.post(
@@ -63,12 +65,12 @@ function CurrentUserProfilePage() {
       );
 
       fetchCurrentUserProfile();
+      toast.success("Friend request accepted.");
     } catch (error) {
-      setError("Failed to accept friend request.");
+      toast.error("Failed to accept friend request.");
     }
   };
 
-  // Handle rejecting a friend request
   const rejectFriendRequest = async (requestId) => {
     try {
       await axios.post(
@@ -80,78 +82,83 @@ function CurrentUserProfilePage() {
       );
 
       fetchCurrentUserProfile();
+      toast.success("Friend request rejected.");
     } catch (error) {
-      setError("Failed to reject friend request.");
+      toast.error("Failed to reject friend request.");
     }
   };
 
-  // Fetch profile when component mounts
   useEffect(() => {
     fetchCurrentUserProfile();
   }, []);
 
-  // Render error or loading state
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">Error: {error}</div>;
-  if (!profile.user) return <div>No user data available.</div>;
+  if (isLoading) return <div className="text-center p-4">
+    <span className="loading loading-spinner loading-lg"></span>
+  </div>;
+  
+  if (error) return <div className="alert alert-error">{error}</div>;
+  
+  if (!profile.user) return <div className="alert">No user data available.</div>;
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
-        {/* User profile section */}
-        <h1 className="text-2xl font-bold mb-4">{profile.user.fullName}</h1>
-        <p className="text-gray-600 mb-4">@{profile.user.username}</p>
-        <p className="text-gray-600 mb-4">{profile.user.email}</p>
+    <div>
+      <Header/>
+      <div className="container mx-auto p-4">
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h1 className="card-title text-2xl">{profile.user.fullName}</h1>
+          <p className="text-gray-500">@{profile.user.username}</p>
+          <p className="text-gray-500">{profile.user.email}</p>
 
-        {/* Friends list */}
-        <h2 className="text-lg font-bold mt-6">Friends</h2>
-        {profile.user.friends && profile.user.friends.length > 0 ? (
-          <ul>
-            {profile.user.friends.map((friend) => (
-              <li key={friend.userId} className="flex justify-between mb-2">
-                <span>@{friend.username}</span>
-                <button
-                  onClick={() => removeFriend(friend.userId)}
-                  className="bg-red-500 text-white px-4 py-1 rounded text-sm"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No friends yet.</p>
-        )}
-
-        {/* Friend requests */}
-        <h2 className="text-lg font-bold mt-6">Friend Requests</h2>
-        {profile.user.friendRequests?.received &&
-        profile.user.friendRequests.received.length > 0 ? (
-          <ul>
-            {profile.user.friendRequests.received.map((request) => (
-              <li key={request._id} className="flex justify-between mb-4">
-                <span>@{request.requester.username}</span>
-                <div>
+          <div className="divider">Friends</div>
+          {profile.user.friends && profile.user.friends.length > 0 ? (
+            <div className="space-y-2">
+              {profile.user.friends.map((friend) => (
+                <div key={friend.userId} className="flex justify-between items-center">
+                  <span>@{friend.username}</span>
                   <button
-                    onClick={() => acceptFriendRequest(request._id)}
-                    className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+                    onClick={() => removeFriend(friend.userId)}
+                    className="btn btn-error btn-sm"
                   >
-                    Accept
-                  </button>
-                  <button
-                    onClick={() => rejectFriendRequest(request._id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded"
-                  >
-                    Reject
+                    Remove
                   </button>
                 </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No pending friend requests.</p>
-        )}
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">No friends yet.</p>
+          )}
+
+          <div className="divider">Friend Requests</div>
+          {profile.user.friendRequests?.received &&
+          profile.user.friendRequests.received.length > 0 ? (
+            <div className="space-y-2">
+              {profile.user.friendRequests.received.map((request) => (
+                <div key={request._id} className="flex justify-between items-center">
+                  <span>@{request.requester.username}</span>
+                  <div className="space-x-2">
+                    <button
+                      onClick={() => acceptFriendRequest(request._id)}
+                      className="btn btn-success btn-sm"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => rejectFriendRequest(request._id)}
+                      className="btn btn-error btn-sm"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">No pending friend requests.</p>
+          )}
+        </div>
       </div>
+    </div>
     </div>
   );
 }

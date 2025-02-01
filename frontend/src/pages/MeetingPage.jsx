@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { GoogleMap, Marker, useLoadScript, Autocomplete } from '@react-google-maps/api';
 import Header from '../components/Header';
+import { useSelector } from 'react-redux';
 
 // Move these outside the component to prevent recreating on each render
 const mapContainerStyle = {
   width: '100%',
   height: '100%',
 };
+
+// const user = useSelector((store)=> store.auth.userInfo )
 
 
 const darkModeStyle = [

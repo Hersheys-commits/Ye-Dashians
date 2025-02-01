@@ -1,1 +1,8 @@
 @import "tailwindcss";
+@plugin "daisyui" {
+    themes: all;
+  }
+
+.flex-1::-webkit-scrollbar {
+    display: none;
+}

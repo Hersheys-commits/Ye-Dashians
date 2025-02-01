@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import Header from '../components/Header';
+import { useSelector } from 'react-redux';
 
 function UserProfilePage() {
   const { username } = useParams();
@@ -9,8 +12,11 @@ function UserProfilePage() {
   const [friendRequestStatus, setFriendRequestStatus] = useState('not_sent');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("user"));
+  const stateuser= useSelector((state)=>state.auth.userInfo);
+  console.log("stateuser",stateuser)
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -27,9 +33,7 @@ function UserProfilePage() {
 
         const userData = response.data.data.user;
         setProfile(userData);
-
-        const requestStatus = response.data.data.friendRequestStatus || 'not_sent';
-        setFriendRequestStatus(requestStatus);
+        setFriendRequestStatus(response.data.data.friendRequestStatus);
       } catch (error) {
         console.error('Error fetching profile:', error);
         setError(error.message || 'An error occurred while fetching the profile.');
@@ -50,10 +54,7 @@ function UserProfilePage() {
         }
       );
 
-      if (response.data.message === 'Already friends' || response.data.statusCode === 202) {
-        setFriendRequestStatus('accepted');
-        toast.success('Already friends!');
-      } else if (response.data.success) {
+      if (response.data.success) {
         setFriendRequestStatus('sent');
         toast.success('Friend request sent successfully!');
       }
@@ -65,60 +66,54 @@ function UserProfilePage() {
     }
   };
 
-  // In your UserProfilePage component, update the cancelFriendRequest function
-
-const cancelFriendRequest = async () => {
-  setIsLoading(true);
-  try {
+  const cancelFriendRequest = async () => {
+    setIsLoading(true);
+    try {
       const response = await axios.delete(
-          `http://localhost:4001/api/friends/cancel-request/${username}`,
-          {
-              withCredentials: true
-          }
+        `http://localhost:4001/api/friends/cancel-request/${username}`,
+        {
+          withCredentials: true
+        }
       );
 
       if (response.status === 200) {
-          setFriendRequestStatus('not_sent');
-          toast.success('Friend request cancelled successfully!');
+        setFriendRequestStatus('not_sent');
+        toast.success('Friend request cancelled successfully!');
       }
-  } catch (error) {
+    } catch (error) {
       console.error('Error cancelling friend request:', error);
       toast.error(
-          error.response?.data?.message || 
-          'Failed to cancel friend request. Please try again.'
+        error.response?.data?.message || 
+        'Failed to cancel friend request. Please try again.'
       );
-  } finally {
+    } finally {
       setIsLoading(false);
-  }
-};
+    }
+  };
 
   const renderFriendRequestButton = () => {
     if (username === user.user.username) {
       return null;
     }
 
-    const isFriend = profile.friends && profile.friends.length > 0;
-
-    if (isFriend) {
-      return (
-        <button
-          disabled
-          className="bg-green-500 text-white px-4 py-2 rounded cursor-not-allowed"
-        >
-          Already Friends
-        </button>
-      );
-    }
-
     switch (friendRequestStatus) {
+      case 'friends':
+        return (
+          <button
+            disabled
+            className="btn btn-success btn-wide cursor-not-allowed"
+          >
+            Friends
+          </button>
+        );
       case 'not_sent':
         return (
           <button
             onClick={sendFriendRequest}
             disabled={isLoading}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-colors"
+            className="btn btn-primary btn-wide"
           >
-            {isLoading ? 'Sending...' : 'Send Friend Request'}
+            {isLoading ? <span className="loading loading-spinner"></span> : 'Send Friend Request'}
           </button>
         );
       case 'sent':
@@ -126,27 +121,9 @@ const cancelFriendRequest = async () => {
           <button
             onClick={cancelFriendRequest}
             disabled={isLoading}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition-colors"
+            className="btn btn-error btn-wide"
           >
-            {isLoading ? 'Cancelling...' : 'Cancel Request'}
-          </button>
-        );
-      case 'accepted':
-        return (
-          <button
-            onClick={() => toast.success('Friends already!')}
-            className="bg-green-500 text-white px-4 py-2 rounded"
-          >
-            Friends
-          </button>
-        );
-      case 'rejected':
-        return (
-          <button
-            disabled
-            className="bg-red-500 text-white px-4 py-2 rounded opacity-50 cursor-not-allowed"
-          >
-            Request Rejected
+            {isLoading ? <span className="loading loading-spinner"></span> : 'Cancel Request'}
           </button>
         );
       default:
@@ -155,24 +132,45 @@ const cancelFriendRequest = async () => {
   };
 
   if (error) return (
-    <div className="container mx-auto p-4 text-center text-red-500">
-      Error: {error}
+    <div className="container mx-auto p-4 text-center">
+      <div className="alert alert-error">{error}</div>
     </div>
   );
   
   if (!profile) return (
-    <div className="container mx-auto p-4 text-center">
-      Loading...
+    <div className="container mx-auto p-4 text-center flex justify-center">
+      <span className="loading loading-spinner loading-lg "></span>
     </div>
   );
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-4">{profile.fullName || 'No Name'}</h1>
-        <p className="text-gray-600 mb-4">@{profile.username || 'No Username'}</p>
-        {renderFriendRequestButton()}
+    <div>
+      <Header/>
+      <div className="container mx-auto p-4">
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body items-center text-center">
+          <div className="avatar mb-4">
+            {profile.avatar ? (
+              <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                <img src={profile.avatar} alt={profile.fullName} />
+              </div>
+            ) : (
+              <div className="w-24 rounded-full bg-neutral-focus text-neutral-content placeholder">
+                <span className="text-3xl">{profile.fullName[0]}</span>
+              </div>
+            )}
+          </div>
+          
+          <h1 className="card-title text-2xl">{profile.fullName}</h1>
+          <p className="text-gray-500">@{profile.username}</p>
+          <p className="text-gray-500">{profile.email}</p>
+
+          <div className="card-actions justify-center mt-4">
+            {renderFriendRequestButton()}
+          </div>
+        </div>
       </div>
+    </div>
     </div>
   );
 }
