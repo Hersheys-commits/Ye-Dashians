@@ -7,7 +7,7 @@ function ChatHeader() {
 
     return (
         <div className="flex justify-center bg-slate-600">
-            <User user={selectedFriend} />
+            <User user={selectedFriend} header={true}/>
         </div>
     );
 }

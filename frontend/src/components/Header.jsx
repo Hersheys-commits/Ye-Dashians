@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlice";
+import Cookies from "js-cookie"
 
 const Header = () => {
     const navigateTo = useNavigate();
@@ -12,7 +13,7 @@ const Header = () => {
     // const { isLoggedIn, userInfo } = useSelector((store) => store.auth);
     const userInfo = JSON.parse(localStorage.getItem("user"));
     var isLoggedIn = false;
-    if (userInfo) isLoggedIn = true;
+    if (userInfo && Cookies.get("accessToken")) isLoggedIn = true;
 
     // const persistLoaded = useSelector((state) => state._persist?.rehydrated);
 

@@ -2,10 +2,22 @@ import React from "react";
 import ChatHeader from "./ChatHeader";
 import Messages from "./Messages";
 import Sendtext from "./Sendtext";
+import { useSelector } from "react-redux";
+import NoChatSelected from "./NoChatSelected"
 
 function ChatArea() {
+    const selectedFriend = useSelector((state)=>state.chat.selectedFriend)
+
+    if(!selectedFriend){
+        return (
+            <div className="w-[70%] h-full bg-slate-800">
+                <NoChatSelected/>
+            </div>
+        )
+    }
+
     return (
-        <div className="w-[70%] h-full bg-slate-800">
+        <div className="w-[70%] h-full bg-gray-900">
             <div>
                 <ChatHeader />
             </div>

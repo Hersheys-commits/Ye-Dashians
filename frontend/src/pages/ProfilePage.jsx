@@ -169,20 +169,14 @@ function UserProfilePage() {
                 <div className="card bg-base-100 shadow-xl">
                     <div className="card-body items-center text-center">
                         <div className="avatar mb-4">
-                            {profile.avatar ? (
                                 <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                                     <img
-                                        src={profile.avatar}
+                                        className="bg-white"
+                                        src={profile.avatar || "/src/assets/Profile_user.png"}
                                         alt={profile.fullName}
                                     />
                                 </div>
-                            ) : (
-                                <div className="w-24 rounded-full bg-neutral-focus text-neutral-content placeholder">
-                                    <span className="text-3xl">
-                                        {profile.fullName[0]}
-                                    </span>
-                                </div>
-                            )}
+                            
                         </div>
 
                         <h1 className="card-title text-2xl">

@@ -41,6 +41,7 @@ const userSchema = new Schema(
         },
         avatar: {
             type: String, 
+            default: null,
         },
         pictures: {
             type: [pictureSchema]
@@ -62,6 +63,10 @@ const userSchema = new Schema(
                 type: String,
                 required: true
             },
+            avatar: {
+                type: String, 
+                default: null,
+            },
         }],
         friendRequests: {
             sent: [{
@@ -74,7 +79,11 @@ const userSchema = new Schema(
                     username: {
                         type: String,
                         required: true
-                    }
+                    },
+                    avatar: {
+                        type: String, 
+                        default: null,
+                    },
                 },
                 status: {
                     type: String,
@@ -96,7 +105,11 @@ const userSchema = new Schema(
                     username: {
                         type: String,
                         required: true
-                    }
+                    },
+                    avatar: {
+                        type: String, 
+                        default: null,
+                    },
                 },
                 status: {
                     type: String,

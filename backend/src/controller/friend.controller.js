@@ -88,7 +88,7 @@ export const getUserProfileById = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const currentUserId = req.user._id;
 
-    const user = await User.findById(id).select('username fullName avatar');
+    const user = await User.findById(id).select('username fullName avatar email');
 
     if (!user) {
         throw new ApiError(404, "User not found");
@@ -153,7 +153,8 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
             'friendRequests.sent': {
                 recipient: {
                     userId: recipient._id,
-                    username: recipient.username
+                    username: recipient.username,
+                    email: recipient.email
                 },
                 status: 'pending'
             }
@@ -166,7 +167,7 @@ export const sendFriendRequest = asyncHandler(async (req, res) => {
                 requester: {
                     userId: sender._id,
                     username: sender.username,
-                    email: sender.email
+                    email: sender.email,
                 },
                 status: 'pending'
             }
@@ -228,7 +229,8 @@ export const acceptFriendRequest = asyncHandler(async (req, res) => {
                 $push: { 
                     friends: {
                         userId: requestDetails.requester.userId,
-                        username: requestDetails.requester.username
+                        username: requestDetails.requester.username,
+                        email: requestDetails.requester.email
                     }
                 },
                 $pull: { 
@@ -245,7 +247,8 @@ export const acceptFriendRequest = asyncHandler(async (req, res) => {
                 $push: { 
                     friends: {
                         userId: recipientId,
-                        username: recipient.username
+                        username: recipient.username,
+                        email: recipient.email
                     }
                 },
                 $pull: { 
@@ -365,7 +368,7 @@ export const getCurrentUserProfile = asyncHandler(async (req, res) => {
     const currentUserId = req.user._id;
 
     const user = await User.findById(currentUserId)
-        .select('username fullName email avatar friends friendRequests.received');
+        .select('-password -refreshToken');
 
     if (!user) {
         throw new ApiError(404, "User not found");

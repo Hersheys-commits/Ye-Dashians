@@ -2,6 +2,11 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import { app } from "./util/socket.js";
+import dotenv from "dotenv";
+
+dotenv.config({
+    path: './.env'
+})
 
 app.use(
   cors({

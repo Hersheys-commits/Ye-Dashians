@@ -14,7 +14,7 @@ export const getUsersForSidebar = async (req, res) => {
 
     // Find the logged in user and populate the friends' user details.
     const user = await User.findById(loggedInUserId)
-      .populate("friends.userId", "fullName email _id")
+      .populate("friends.userId", "fullName email _id avatar username")
       .select("friends");
 
     if (!user) {
@@ -63,25 +63,39 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const text = req.body.text ? req.body.text : null;
+    const imageLocalPath =req?.file?.path || null;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
-    let imageUrl;
-    if (image) {
-      // Upload base64 image to cloudinary
-      const uploadResponse = await uploadOnCloudinary(image);
+    console.log("Image local path:", imageLocalPath); // Debug log
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    let cloudinaryResponse;
+    let imageUrl = null;
 
-      if (!uploadResponse) {
-        throw new ApiError(400, "Image file is required")
+    if (imageLocalPath) {
+      // Add file type validation
+      if (!allowedTypes.includes(req.file.mimetype)) {
+          fs.unlinkSync(imageLocalPath); // Delete the invalid file
+          throw new ApiError(400, "Invalid file type. Only JPEG, PNG and GIF are allowed");
+      }
+  
+      cloudinaryResponse = await uploadOnCloudinary(imageLocalPath);
+      console.log("Cloudinary response:", cloudinaryResponse); // Debug log
+      if (!cloudinaryResponse?.url) {
+        throw new ApiError(400, "Error while uploading image");
+      }else{
+        imageUrl = cloudinaryResponse.url;
+      }
     }
-      imageUrl = uploadResponse.url;
-    }
+
+
 
     const newMessage = new Message({
       senderId,
       receiverId,
-      text,
+      text: text,
       image: imageUrl,
     });
 
