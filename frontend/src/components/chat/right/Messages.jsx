@@ -14,11 +14,11 @@ function Messages() {
 
     // Move useEffect after all hooks are defined
     useEffect(() => {
-        setTimeout(()=>{
+        setTimeout(() => {
             if (lastMessageRef.current) {
                 lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
             }
-        },0);
+        }, 0);
     }, [messages]);
 
     if (!selectedFriend) {

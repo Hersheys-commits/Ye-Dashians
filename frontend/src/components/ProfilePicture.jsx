@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { Camera, Trash2 } from "lucide-react"
-import toast from 'react-hot-toast';
-import axios from 'axios';
+import React, { useState } from "react";
+import { Camera, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 function ProfilePicture() {
     const authUser = JSON.parse(localStorage.getItem("user"));
@@ -41,8 +41,8 @@ function ProfilePicture() {
                     ...authUser,
                     user: {
                         ...authUser.user,
-                        avatar: response.data.data.avatar
-                    }
+                        avatar: response.data.data.avatar,
+                    },
                 };
                 localStorage.setItem("user", JSON.stringify(updatedUser));
                 setSelectedImg(response.data.data.avatar);
@@ -50,7 +50,10 @@ function ProfilePicture() {
             }
         } catch (error) {
             console.error("Upload error:", error);
-            toast.error(error.response?.data?.message || "Failed to update profile picture");
+            toast.error(
+                error.response?.data?.message ||
+                    "Failed to update profile picture"
+            );
         } finally {
             setIsUpdatingProfile(false);
         }
@@ -64,8 +67,8 @@ function ProfilePicture() {
                 {
                     withCredentials: true,
                     headers: {
-                        "Authorization": `Bearer ${authUser.accessToken}`
-                    }
+                        Authorization: `Bearer ${authUser.accessToken}`,
+                    },
                 }
             );
 
@@ -75,25 +78,32 @@ function ProfilePicture() {
                     ...authUser,
                     user: {
                         ...authUser.user,
-                        avatar: null
-                    }
+                        avatar: null,
+                    },
                 };
                 localStorage.setItem("user", JSON.stringify(updatedUser));
                 setSelectedImg(null);
                 toast.success("Profile picture removed successfully");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to remove profile picture");
+            toast.error(
+                error.response?.data?.message ||
+                    "Failed to remove profile picture"
+            );
         } finally {
             setIsUpdatingProfile(false);
         }
     };
 
     return (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 mr-20">
             <div className="relative">
                 <img
-                    src={selectedImg || authUser.user.avatar || "/src/assets/Profile_user.png"}
+                    src={
+                        selectedImg ||
+                        authUser.user.avatar ||
+                        "/src/assets/Profile_user.png"
+                    }
                     alt="Profile"
                     className={`size-32 rounded-full object-cover border-4 ${
                         !selectedImg && !authUser.user.avatar ? "bg-white" : ""
@@ -120,7 +130,7 @@ function ProfilePicture() {
                     />
                 </label>
                 {/* Delete button - only show if there's a selected or uploaded image */}
-                {((authUser.user.avatar)) && (
+                {authUser.user.avatar && (
                     <button
                         onClick={handleRemoveImage}
                         disabled={isUpdatingProfile}
@@ -140,7 +150,7 @@ function ProfilePicture() {
                 {isUpdatingProfile ? "Processing..." : ""}
             </p>
         </div>
-    )
+    );
 }
 
-export default ProfilePicture
+export default ProfilePicture;

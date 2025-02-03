@@ -1,8 +1,7 @@
-
 import React from "react";
 import { useSelector } from "react-redux";
 import { formatMessageTime } from "../../../utils/time";
-import defaultAvatar from '../../../assets/Profile_user.png';
+import defaultAvatar from "../../../assets/Profile_user.png";
 
 function Message({ message }) {
     const selectedFriend = useSelector((store) => store.chat.selectedFriend);
@@ -20,9 +19,9 @@ function Message({ message }) {
                 >
                     {/* Image only */}
                     {message.image && !message.text && (
-                        <img 
-                            src={message.image} 
-                            alt="Message" 
+                        <img
+                            src={message.image}
+                            alt="Message"
                             className="rounded-lg max-w-[200px] max-h-[300px] object-contain"
                         />
                     )}
@@ -30,19 +29,21 @@ function Message({ message }) {
                     {/* Text only */}
                     {message.text && !message.image && (
                         <div className="inline-block max-w-[500px] break-words">
-                        {message.text}
-                      </div>
+                            {message.text}
+                        </div>
                     )}
 
                     {/* Both image and text */}
                     {message.image && message.text && (
                         <div className="flex flex-col -mx-3 -mt-1 max-w-[200px]">
-                            <img 
-                                src={message.image} 
-                                alt="Message" 
-                                className="rounded-lg w-full max-h-[300px] object-contain" 
+                            <img
+                                src={message.image}
+                                alt="Message"
+                                className="rounded-lg w-full max-h-[300px] object-contain"
                             />
-                            <span className="-mb-1 break-words">{message.text}</span>
+                            <span className="-mb-1 break-words">
+                                {message.text}
+                            </span>
                         </div>
                     )}
                 </div>

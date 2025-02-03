@@ -36,7 +36,6 @@
 
 // export default useSendMessage;
 
-
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessages } from "../store/chatSlice";
@@ -58,7 +57,7 @@ function useSendMessage() {
             if (messageData.image) {
                 formData.append("image", messageData.image);
             }
-            console.log("first")
+            console.log("first");
             const res = await axios.post(
                 `http://localhost:4001/api/message/sendMessage/${selectedFriend._id}`,
                 formData,

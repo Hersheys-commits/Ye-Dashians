@@ -10,6 +10,7 @@ import MeetingPage from "./pages/MeetingPage";
 import UserProfilePage from "./pages/ProfilePage";
 import CurrentUserProfilePage from "./pages/CurProfilePage";
 import Chat from "./pages/Chat";
+import Questionnaire from "./pages/Questionnaire";
 
 function App() {
     const userInfo = JSON.parse(localStorage.getItem("user"));
@@ -20,6 +21,7 @@ function App() {
         <div>
             <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/questionnaire" element={<Questionnaire />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route
                     path="/message"

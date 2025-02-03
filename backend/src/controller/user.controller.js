@@ -74,6 +74,8 @@ const registerUser = asyncHandler( async (req, res) => {
         username: username.toLowerCase()
     })
 
+    const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id)
+
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
@@ -82,8 +84,16 @@ const registerUser = asyncHandler( async (req, res) => {
         throw new ApiError(500, "Something went wrong while registering the user")
     }
 
-    return res.status(201).json(
-        new ApiResponse(200, createdUser, "User registered Successfully")
+    const options = {
+        // httpOnly: true,
+        secure: true
+    }
+
+    return res.status(201)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+        new ApiResponse(200, {user:createdUser}, "User registered Successfully")
     )
 
 } )
@@ -254,9 +264,9 @@ const getCurrentUser = asyncHandler(async(req, res) => {
 })
 
 const updateAccountDetails = asyncHandler(async(req, res) => {
-    const {fullName, email} = req.body
+    const {fullName, age ,address,gender} = req.body
 
-    if (!fullName || !email) {
+    if (!fullName || !age || !address || !gender) {
         throw new ApiError(400, "All fields are required")
     }
 
@@ -265,12 +275,39 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
         {
             $set: {
                 fullName,
-                email: email
+                age,
+                address,
+                gender
             }
         },
         {new: true}
         
     ).select("-password")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Account details updated successfully"))
+});
+
+
+
+const updateAccountQuestion = asyncHandler(async(req, res) => {
+    const age = req?.body?.age || null;
+    const gender = req?.body?.gender || null;
+    const address = req?.body?.address || null;
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                age,
+                address,
+                gender
+            }
+        },
+        {new: true}
+        
+    ).select("-password -refreshToken")
 
     return res
     .status(200)
@@ -381,6 +418,62 @@ const removeUserAvatar = asyncHandler(async(req, res) => {
 
 
 
+
+
+const updatePreferences = async (req, res) => {
+  try {
+    // req.body should contain an object "preferences" with keys like restaurant, cafe, etc.
+    const { preferences } = req.body;
+    if (!preferences || typeof preferences !== 'object') {
+      return res.status(400).json({ success: false, message: 'Invalid preferences data' });
+    }
+
+    // Convert the boolean flags into an array of strings
+    const selectedPreferences = Object.keys(preferences).filter(
+      (place) => preferences[place] === true
+    );
+
+    // Assuming req.user is populated by your auth middleware
+    const userId = req.user._id;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { preferences: selectedPreferences },
+      { new: true }
+    );
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,updatedUser,"Preferences Updated successfully"));
+  } catch (error) {
+    console.error('Error updating preferences:', error);
+    throw new ApiError(400, `Avatar update failed: ${error.message}`);
+  }
+};
+
+
+
+const updateBio = async (req,res)=>{
+    const bio = req.body?.bio || null;
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                bio
+            }
+        },
+        {new: true}
+        
+    ).select("-password -refreshToken")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Account details updated successfully"))
+}
+
+
+
 export {
     registerUser,
     loginUser,
@@ -390,5 +483,8 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    removeUserAvatar
+    removeUserAvatar,
+    updateAccountQuestion,
+    updatePreferences,
+    updateBio
 }

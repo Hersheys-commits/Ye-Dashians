@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Header from "../components/Header";
 import { useSelector } from "react-redux";
+import { BsChatHeartFill } from "react-icons/bs";
+import { MdOutlineChat } from "react-icons/md";
 
 function UserProfilePage() {
     const { username } = useParams();
@@ -166,27 +168,64 @@ function UserProfilePage() {
         <div>
             <Header />
             <div className="container mx-auto p-4">
-                <div className="card bg-base-100 shadow-xl">
-                    <div className="card-body items-center text-center">
-                        <div className="avatar mb-4">
-                                <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                <div className="card bg-base-100 shadow-xl p-6">
+                    <div className="flex flex-col md:flex-row items-center">
+                        {/* Profile Picture */}
+                        <div className="mb-4 md:mb-0 md:mr-6 flex-shrink-0">
+                            <div className="avatar">
+                                <div className="w-100 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                                     <img
                                         className="bg-white"
-                                        src={profile.avatar || "/src/assets/Profile_user.png"}
+                                        src={
+                                            profile.avatar ||
+                                            "/src/assets/Profile_user.png"
+                                        }
                                         alt={profile.fullName}
                                     />
                                 </div>
-                            
+                            </div>
                         </div>
-
-                        <h1 className="card-title text-2xl">
-                            {profile.fullName}
-                        </h1>
-                        <p className="text-gray-500">@{profile.username}</p>
-                        <p className="text-gray-500">{profile.email}</p>
-
-                        <div className="card-actions justify-center mt-4">
-                            {renderFriendRequestButton()}
+                        {/* Profile Details */}
+                        <div className="text-center ml-10 md:text-left">
+                            <h1 className="text-5xl font-bold mb-2">
+                                {profile.fullName}
+                            </h1>
+                            <p className="text-gray-500 mb-1 text-2xl">
+                                @{profile.username}
+                            </p>
+                            {profile.age && (
+                                <p className="text-gray-500 mb-1 text-2xl">
+                                    Age: {profile.age}
+                                </p>
+                            )}
+                            {profile.address && (
+                                <p className="text-gray-500 mb-1 text-2xl">
+                                    Address: {profile.address}
+                                </p>
+                            )}
+                            <div className="mt-4">
+                                {renderFriendRequestButton()}
+                            </div>
+                            <div className="mt-4">
+                                {friendRequestStatus == "friends" && (
+                                    <div>
+                                        <button className="btn btn-soft btn-secondary ">
+                                            Chat
+                                            <MdOutlineChat
+                                                onClick={() => {
+                                                    navigate("/message");
+                                                    dispatch(
+                                                        setSelectedFriend(
+                                                            friend
+                                                        )
+                                                    );
+                                                }}
+                                                className="text-2xl text-pink-200 cursor-pointer hover:scale-110 transition-transform"
+                                            />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -47,7 +47,7 @@ function Sendtext() {
 
         await sendMessage({
             text: data.message,
-            image: selectedImage
+            image: selectedImage,
         });
 
         reset();
@@ -74,7 +74,7 @@ function Sendtext() {
                     </div>
                 </div>
             )}
-            
+
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="flex space-x-1 h-[8vh] bg-gray-800">
                     <div className="w-[70%] mx-4">
@@ -97,12 +97,12 @@ function Sendtext() {
                         onClick={handleImageClick}
                         className={`${imagePreview ? "text-blue-500" : "text-gray-400"} hover:text-blue-500 transition-colors`}
                     >
-                        <FaImage className="text-3xl mr-6 ml-2"/>
+                        <FaImage className="text-3xl mr-6 ml-2" />
                     </button>
-                    <button 
+                    <button
                         type="submit"
                         disabled={sendMessageLoading}
-                        className={`${(!register("message") && !selectedImage) ? "text-gray-500" : "text-blue-500"} hover:text-blue-600 transition-colors`}
+                        className={`${!register("message") && !selectedImage ? "text-gray-500" : "text-blue-500"} hover:text-blue-600 transition-colors`}
                     >
                         <IoSend className="text-3xl" />
                     </button>

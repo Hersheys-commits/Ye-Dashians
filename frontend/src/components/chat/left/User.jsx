@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setSelectedFriend } from "../../../store/chatSlice";
-import { useSocket } from '../../../hooks/socketHook';
-import defaultAvatar from '../../../assets/Profile_user.png';
+import { useSocket } from "../../../hooks/socketHook";
+import defaultAvatar from "../../../assets/Profile_user.png";
 
 const User = ({ user, header = false }) => {
     const dispatch = useDispatch();
@@ -21,9 +21,11 @@ const User = ({ user, header = false }) => {
             className={`flex py-2 pr-2 ${!header ? "hover:bg-slate-600 duration-300 cursor-pointer" : ""} ${isSelected && !header ? "bg-slate-800" : ""}`}
             onClick={handleUserClick}
         >
-            <div className={`avatar ${isOnline ? "avatar-online" : "avatar-offline"} w-10 h-10 mx-2`}>
+            <div
+                className={`avatar ${isOnline ? "avatar-online" : "avatar-offline"} w-10 h-10 mx-2`}
+            >
                 <div className="w-24 rounded-full bg-white">
-                    <img 
+                    <img
                         src={user?.avatar ? user.avatar : defaultAvatar}
                         alt={user?.fullName || "User Avatar"}
                         className="w-full h-full object-cover"
@@ -34,9 +36,9 @@ const User = ({ user, header = false }) => {
                 <div className="font-bold">
                     {user?.fullName || "Harsh Sharma"}
                 </div>
-                {!header && (<div>{user?.email || "harshsharma@gmail.com"}</div>)}
-                {header && isOnline && (<div>Online</div>)}
-                {header && !isOnline && (<div>Offline</div>)}
+                {!header && <div>{user?.email || "harshsharma@gmail.com"}</div>}
+                {header && isOnline && <div>Online</div>}
+                {header && !isOnline && <div>Offline</div>}
             </div>
         </div>
     );

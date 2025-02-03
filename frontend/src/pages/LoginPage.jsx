@@ -33,9 +33,9 @@ const LoginPage = () => {
             toast.success(
                 response.data.message || "User logged in successfully"
             );
-
-            localStorage.setItem("user",JSON.stringify(response.data.data))
-            console.log(response.data.data.user.avatar,"aghfshf")
+            console.log(response.data.data.user);
+            localStorage.setItem("user", JSON.stringify(response.data.data));
+            console.log(response.data.data.user.avatar, "aghfshf");
             dispatch(
                 login({
                     user: response.data.data.user,

@@ -32,7 +32,7 @@ export const getUserProfile = asyncHandler(async (req, res) => {
     const currentUserId = req.user._id;
 
     const user = await User.findOne({ username })
-    .select('username fullName avatar email');
+    .select('username fullName avatar email age');
     
     if (!user) {
         throw new ApiError(404, "User not found");

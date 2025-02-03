@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlice";
-import Cookies from "js-cookie"
+import Cookies from "js-cookie";
 
 const Header = () => {
     const navigateTo = useNavigate();
@@ -106,7 +106,7 @@ const Header = () => {
                             role="button"
                             className="btn btn-ghost"
                         >
-                            {userInfo?.name || "User"}
+                            {userInfo?.user?.fullName || "User"}
                             <svg
                                 className="w-4 h-4 ml-2"
                                 fill="none"

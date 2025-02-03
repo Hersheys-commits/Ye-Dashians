@@ -27,6 +27,8 @@ const SignupPage = () => {
                 }
             );
             console.log(response.data);
+            localStorage.setItem("user", JSON.stringify(response.data.data));
+
             toast.success(
                 response.data.message || "User registered successfully"
             );

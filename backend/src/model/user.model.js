@@ -37,7 +37,25 @@ const userSchema = new Schema(
             index: true
         },
         age:{
-            type: Number
+            type: Number,
+            default: null
+        },
+        gender:{
+            type: String,
+            enum: ['male','female','other'],
+            default: null
+        },
+        address:{
+            type: String,
+            default: null
+        },
+        bio:{
+            type: String,
+            default: null
+        },
+        preferences:{
+            type: [String],
+            default: []
         },
         avatar: {
             type: String, 
