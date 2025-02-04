@@ -1,7 +1,6 @@
-import mongoose, {Schema} from "mongoose";
-import jwt from "jsonwebtoken"
-import bcrypt from "bcrypt"
-
+import mongoose, { Schema } from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const pictureSchema = new Schema(
     {
@@ -20,171 +19,179 @@ const userSchema = new Schema(
             required: true,
             unique: true,
             lowercase: true,
-            trim: true, 
-            index: true
+            trim: true,
+            index: true,
         },
         email: {
             type: String,
-            required: [true, 'Email is required'],
+            required: [true, "Email is required"],
             unique: true,
             lowecase: true,
-            trim: true, 
+            trim: true,
         },
         fullName: {
             type: String,
-            required: [true, 'Full name is required'],
-            trim: true, 
-            index: true
+            required: [true, "Full name is required"],
+            trim: true,
+            index: true,
         },
-        age:{
+        googleId: {
+            type: String,
+            unique: true,
+        },
+        age: {
             type: Number,
-            default: null
+            default: null,
         },
-        gender:{
+        gender: {
             type: String,
-            enum: ['male','female','other'],
-            default: null
+            enum: ["male", "female", "other"],
+            default: null,
         },
-        address:{
+        address: {
             type: String,
-            default: null
+            default: null,
         },
-        bio:{
+        bio: {
             type: String,
-            default: null
+            default: null,
         },
-        preferences:{
+        preferences: {
             type: [String],
-            default: []
+            default: [],
         },
         avatar: {
-            type: String, 
+            type: String,
             default: null,
         },
         pictures: {
-            type: [pictureSchema]
+            type: [pictureSchema],
         },
         password: {
             type: String,
-            required: [true, 'Password is required']
+            // required: [true, 'Password is required']
         },
         refreshToken: {
-            type: String
+            type: String,
         },
-        friends: [{
-            userId: {
-                type: Schema.Types.ObjectId,
-                ref: 'User',
-                required: true
+        friends: [
+            {
+                userId: {
+                    type: Schema.Types.ObjectId,
+                    ref: "User",
+                    required: true,
+                },
+                username: {
+                    type: String,
+                    required: true,
+                },
+                avatar: {
+                    type: String,
+                    default: null,
+                },
             },
-            username: {
-                type: String,
-                required: true
-            },
-            avatar: {
-                type: String, 
-                default: null,
-            },
-        }],
+        ],
         friendRequests: {
-            sent: [{
-                recipient: {
-                    userId: {
-                        type: Schema.Types.ObjectId,
-                        ref: 'User',
-                        required: true
+            sent: [
+                {
+                    recipient: {
+                        userId: {
+                            type: Schema.Types.ObjectId,
+                            ref: "User",
+                            required: true,
+                        },
+                        username: {
+                            type: String,
+                            required: true,
+                        },
+                        avatar: {
+                            type: String,
+                            default: null,
+                        },
                     },
-                    username: {
+                    status: {
                         type: String,
-                        required: true
+                        enum: ["pending", "accepted", "rejected"],
+                        default: "pending",
                     },
-                    avatar: {
-                        type: String, 
-                        default: null,
+                    createdAt: {
+                        type: Date,
+                        default: Date.now,
                     },
                 },
-                status: {
-                    type: String,
-                    enum: ['pending', 'accepted', 'rejected'],
-                    default: 'pending'
-                },
-                createdAt: {
-                    type: Date,
-                    default: Date.now
-                }
-            }],
-            received: [{
-                requester: {
-                    userId: {
-                        type: Schema.Types.ObjectId,
-                        ref: 'User',
-                        required: true
+            ],
+            received: [
+                {
+                    requester: {
+                        userId: {
+                            type: Schema.Types.ObjectId,
+                            ref: "User",
+                            required: true,
+                        },
+                        username: {
+                            type: String,
+                            required: true,
+                        },
+                        avatar: {
+                            type: String,
+                            default: null,
+                        },
                     },
-                    username: {
+                    status: {
                         type: String,
-                        required: true
+                        enum: ["pending", "accepted", "rejected"],
+                        default: "pending",
                     },
-                    avatar: {
-                        type: String, 
-                        default: null,
+                    createdAt: {
+                        type: Date,
+                        default: Date.now,
                     },
                 },
-                status: {
-                    type: String,
-                    enum: ['pending', 'accepted', 'rejected'],
-                    default: 'pending'
-                },
-                createdAt: {
-                    type: Date,
-                    default: Date.now
-                }
-            }]
-        }
-
+            ],
+        },
     },
     {
-        timestamps: true
+        timestamps: true,
     }
-)
+);
 
 userSchema.pre("save", async function (next) {
-    if(!this.isModified("password")) return next();
+    if (!this.isModified("password")) return next();
 
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
-})
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+});
 
-userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password, this.password)
-}
+userSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password);
+};
 
-userSchema.methods.generateAccessToken = function(){
+userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         {
             _id: this._id,
             email: this.email,
             username: this.username,
-            fullName: this.fullName
+            fullName: this.fullName,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
         }
-    )
-}
-userSchema.methods.generateRefreshToken = function(){
+    );
+};
+userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
             _id: this._id,
-            
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
         }
-    )
-}
+    );
+};
 
-const User = mongoose.model("User", userSchema)
+const User = mongoose.model("User", userSchema);
 
-export default User
+export default User;

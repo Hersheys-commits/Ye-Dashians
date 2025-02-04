@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Header from "../components/Header";
-import { useSelector } from "react-redux";
 import { BsChatHeartFill } from "react-icons/bs";
 import { MdOutlineChat } from "react-icons/md";
 
@@ -18,7 +17,6 @@ function UserProfilePage() {
 
     const user = JSON.parse(localStorage.getItem("user"));
     const stateuser = useSelector((state) => state.auth.userInfo);
-    console.log("stateuser", stateuser);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -160,7 +158,7 @@ function UserProfilePage() {
     if (!profile)
         return (
             <div className="container mx-auto p-4 text-center flex justify-center">
-                <span className="loading loading-spinner loading-lg "></span>
+                <span className="loading loading-spinner loading-lg"></span>
             </div>
         );
 
@@ -169,61 +167,110 @@ function UserProfilePage() {
             <Header />
             <div className="container mx-auto p-4">
                 <div className="card bg-base-100 shadow-xl p-6">
-                    <div className="flex flex-col md:flex-row items-center">
-                        {/* Profile Picture */}
+                    <div className="flex flex-col md:flex-row items-start">
+                        {/* Left Column - Profile Picture */}
                         <div className="mb-4 md:mb-0 md:mr-6 flex-shrink-0">
                             <div className="avatar">
-                                <div className="w-100 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                <div className="w-64 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                                     <img
                                         className="bg-white"
                                         src={
                                             profile.avatar ||
-                                            "/src/assets/Profile_user.png"
+                                            "/api/placeholder/256/256"
                                         }
                                         alt={profile.fullName}
                                     />
                                 </div>
                             </div>
                         </div>
-                        {/* Profile Details */}
-                        <div className="text-center ml-10 md:text-left">
-                            <h1 className="text-5xl font-bold mb-2">
-                                {profile.fullName}
-                            </h1>
-                            <p className="text-gray-500 mb-1 text-2xl">
-                                @{profile.username}
-                            </p>
-                            {profile.age && (
-                                <p className="text-gray-500 mb-1 text-2xl">
-                                    Age: {profile.age}
+
+                        {/* Right Column - Profile Details */}
+                        <div className="flex-grow ml-0 md:ml-10">
+                            {/* Basic Info Section */}
+                            <div className="mb-6">
+                                <h1 className="text-4xl font-bold mb-2">
+                                    {profile.fullName}
+                                </h1>
+                                <p className="text-xl text-gray-500 mb-4">
+                                    @{profile.username}
                                 </p>
-                            )}
-                            {profile.address && (
-                                <p className="text-gray-500 mb-1 text-2xl">
-                                    Address: {profile.address}
-                                </p>
-                            )}
-                            <div className="mt-4">
-                                {renderFriendRequestButton()}
-                            </div>
-                            <div className="mt-4">
-                                {friendRequestStatus == "friends" && (
-                                    <div>
-                                        <button className="btn btn-soft btn-secondary ">
-                                            Chat
-                                            <MdOutlineChat
-                                                onClick={() => {
-                                                    navigate("/message");
-                                                    dispatch(
-                                                        setSelectedFriend(
-                                                            friend
-                                                        )
-                                                    );
-                                                }}
-                                                className="text-2xl text-pink-200 cursor-pointer hover:scale-110 transition-transform"
-                                            />
-                                        </button>
+
+                                {/* Bio Section */}
+                                {profile.bio && (
+                                    <div className="bg-base-200 p-4 rounded-lg mb-4">
+                                        <p className="text-lg">{profile.bio}</p>
                                     </div>
+                                )}
+                            </div>
+
+                            {/* Personal Details Section */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                {profile.age && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold">
+                                            Age:
+                                        </span>
+                                        <span>{profile.age}</span>
+                                    </div>
+                                )}
+                                {profile.gender && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold">
+                                            Gender:
+                                        </span>
+                                        <span className="capitalize">
+                                            {profile.gender}
+                                        </span>
+                                    </div>
+                                )}
+                                {profile.address && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold">
+                                            Location:
+                                        </span>
+                                        <span>{profile.address}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Preferences Section */}
+                            {profile.preferences &&
+                                profile.preferences.length > 0 && (
+                                    <div className="mb-6">
+                                        <h3 className="text-xl font-semibold mb-3">
+                                            Interests
+                                        </h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {profile.preferences.map(
+                                                (preference, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="badge badge-primary badge-lg"
+                                                    >
+                                                        {preference}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-wrap gap-4 mt-6">
+                                {renderFriendRequestButton()}
+                                {friendRequestStatus === "friends" && (
+                                    <button
+                                        onClick={() => {
+                                            navigate("/message");
+                                            dispatch(
+                                                setSelectedFriend(profile)
+                                            );
+                                        }}
+                                        className="btn btn-secondary"
+                                    >
+                                        Chat
+                                        <MdOutlineChat className="text-2xl ml-2" />
+                                    </button>
                                 )}
                             </div>
                         </div>

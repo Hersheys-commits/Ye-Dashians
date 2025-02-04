@@ -1,6 +1,10 @@
 import express from "express";
 import { verifyJWT } from "../middleware/auth.middleware.js";
-import { getMessages, getUsersForSidebar, sendMessage} from "../controller/message.controller.js";
+import {
+    getMessages,
+    getUsersForSidebar,
+    sendMessage,
+} from "../controller/message.controller.js";
 import { upload } from "../middleware/multer.middleware.js";
 
 const router = express.Router();
