@@ -6,9 +6,16 @@ import {
     Autocomplete,
 } from "@react-google-maps/api";
 import { darkModeStyle } from "../utils/constants";
-// import { calculateDistance } from "../utils/calculateDistance";
 import Header from "../components/Header";
 import axios from "axios";
+import useMeetingHook from "../utils/meetingUtil";
+import { useDispatch } from "react-redux";
+import { setSelectedFriend } from "../store/chatSlice";
+import useSendMessage from "../hooks/useSendMessage";
+import { useSocket } from "../hooks/socketHook";
+import toast from "react-hot-toast";
+import useGetAllFriends from "../hooks/useGetAllFriends";
+import { useNavigate } from "react-router-dom";
 
 const mapContainerStyle = {
     width: "100%",
@@ -18,7 +25,7 @@ const mapContainerStyle = {
 const libraries = ["places"];
 
 function MeetingPage() {
-    // Location, map, and venue states
+    // 1. All useState hooks
     const [currentLocation, setCurrentLocation] = useState({ lat: 0, lng: 0 });
     const [selectedAddress1, setSelectedAddress1] = useState("");
     const [addressCoordinates1, setAddressCoordinates1] = useState({
@@ -34,20 +41,27 @@ function MeetingPage() {
     const [mapZoom, setMapZoom] = useState(12);
     const [venuePreference, setVenuePreference] = useState("restaurant");
     const [nearbyVenues, setNearbyVenues] = useState([]);
-
-    // New state for overlay and form submission
     const [isOverlayMinimized, setIsOverlayMinimized] = useState(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
+    // 2. All useRef hooks
     const autocompleteRef1 = useRef(null);
     const autocompleteRef2 = useRef(null);
 
+    // 3. Custom hooks and other hooks
+    const navigateTo = useNavigate();
+    const { calculateDistance, getZoomLevel, findMidpoint } = useMeetingHook();
+    const [allFriends, friendLoading] = useGetAllFriends();
+    const { selectedFriend, onlineUsers } = useSocket();
+    const { sendMessageLoading, sendMessage } = useSendMessage();
+    const dispatch = useDispatch();
     const { isLoaded } = useLoadScript({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_API,
         libraries,
     });
 
-    // Get current location and set map center
+    // 4. All useEffect hooks
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -68,7 +82,6 @@ function MeetingPage() {
         );
     }, []);
 
-    // Adjust map center and zoom when addresses change
     useEffect(() => {
         if (
             addressCoordinates1.lat !== 0 &&
@@ -102,14 +115,75 @@ function MeetingPage() {
         }
     }, [addressCoordinates1, addressCoordinates2]);
 
-    const toRadians = (degrees) => degrees * (Math.PI / 180);
+    const getVenueHtmlString = (venue, selectedFriend, getPhotoUrl) => {
+        return `
+          <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+            <div class="md:flex">
+              <div class="p-6">
+                <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">${venue.name}</div>
+                <p class="block mt-1 text-lg leading-tight font-medium text-black">${venue.vicinity}</p>
+                <p class="mt-2 text-gray-500">Rating: ${venue.rating}</p>
+                ${
+                    venue.distanceInfo && venue.distanceInfo.user1
+                        ? `<p class="mt-2 text-gray-600 text-xs">From Location 1: ${venue.distanceInfo.user1.distance} (${venue.distanceInfo.user1.duration})</p>`
+                        : ""
+                }
+                ${
+                    venue.distanceInfo && venue.distanceInfo.user2
+                        ? `<p class="mt-2 text-gray-600 text-xs">From Location 2: ${venue.distanceInfo.user2.distance} (${venue.distanceInfo.user2.duration})</p>`
+                        : ""
+                }
+              </div>
+              <div class="md:flex-shrink-0">
+                <img class="h-48 w-full object-cover md:w-48" src="${getPhotoUrl(venue)}" alt="${venue.name}" />
+              </div>
+            </div>
+          </div>
+        `;
+    };
 
-    const getZoomLevel = (distance) => {
-        if (distance < 1) return 14;
-        if (distance < 5) return 12;
-        if (distance < 10) return 10;
-        if (distance < 20) return 8;
-        return 6;
+    const handleShare = async (venue) => {
+        if (!selectedFriend) {
+            alert("Please select a friend first");
+            return;
+        }
+
+        const htmlStringManual = getVenueHtmlString(
+            venue,
+            selectedFriend,
+            getPhotoUrl
+        );
+        console.log("Manual HTML string:", htmlStringManual);
+
+        if (!htmlStringManual) {
+            console.log("there is no html string generated.");
+            return;
+        }
+
+        try {
+            await sendMessage({
+                text: htmlStringManual,
+                image: null,
+                isTemplate: true,
+            });
+            toast.success("Venue Shared Successfully.");
+        } catch (error) {
+            console.log(error);
+            toast.error("Unable to share venue.");
+        }
+    };
+
+    // Helper function to get the photo URL for the first photo only
+    const getPhotoUrl = (venue) => {
+        if (
+            venue.photos &&
+            venue.photos.length > 0 &&
+            venue.photos[0].photo_reference
+        ) {
+            return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${venue.photos[0].width}&photoreference=${venue.photos[0].photo_reference}&key=${import.meta.env.VITE_GOOGLE_MAP_API}`;
+        }
+        // Template error photo if no valid photo exists
+        return "/api/placeholder/96/96";
     };
 
     // Handle place selection for both locations
@@ -144,31 +218,12 @@ function MeetingPage() {
         }
     };
 
-    const calculateDistance = (coord1, coord2) => {
-        const R = 6371;
-        const dLat = toRadians(coord2.lat - coord1.lat);
-        const dLon = toRadians(coord2.lng - coord1.lng);
-        const a =
-            Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRadians(coord1.lat)) *
-                Math.cos(toRadians(coord2.lat)) *
-                Math.sin(dLon / 2) ** 2;
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-    };
-
     // Toggle the overlay minimize state
     const toggleOverlay = () => {
         setIsOverlayMinimized((prev) => !prev);
     };
 
     if (!isLoaded) return <div>Loading...</div>;
-
-    // Find midpoint between two coordinates
-    const findMidpoint = (coord1, coord2) => ({
-        lat: (coord1.lat + coord2.lat) / 2,
-        lng: (coord1.lng + coord2.lng) / 2,
-    });
 
     // Use GET request via your server proxy (using Axios) to fetch nearby places
     const searchNearbyVenues = async () => {
@@ -210,21 +265,59 @@ function MeetingPage() {
             const data = response.data;
 
             if (data.status === "OK") {
-                const limitedVenues = data.results
-                    .slice(0, 15)
-                    .map((venue) => ({
-                        name: venue.name,
-                        vicinity: venue.vicinity,
-                        location: {
-                            lat: venue.geometry.location.lat,
-                            lng: venue.geometry.location.lng,
-                        },
-                        rating: venue.rating || "N/A",
-                    }));
+                // For each venue, fetch distance & duration info for both users using your backend endpoint.
+                const venuesWithDistance = await Promise.all(
+                    data.results.map(async (venue) => {
+                        try {
+                            const origin1 = `${addressCoordinates1?.lat},${addressCoordinates1?.lng}`;
+                            const origin2 = `${addressCoordinates2?.lat},${addressCoordinates2?.lng}`;
+                            const destination = `${venue.geometry.location?.lat},${venue.geometry.location?.lng}`;
 
-                setNearbyVenues(limitedVenues);
+                            const [response1, response2] = await Promise.all([
+                                axios.get(
+                                    "http://localhost:4001/api/distance",
+                                    {
+                                        params: {
+                                            origin: origin1,
+                                            destination: destination,
+                                        },
+                                        withCredentials: true,
+                                    }
+                                ),
+                                axios.get(
+                                    "http://localhost:4001/api/distance",
+                                    {
+                                        params: {
+                                            origin: origin2,
+                                            destination: destination,
+                                        },
+                                        withCredentials: true,
+                                    }
+                                ),
+                            ]);
 
-                if (limitedVenues.length > 0) {
+                            return {
+                                ...venue,
+                                distanceInfo: {
+                                    user1: response1.data, // Expected: { distance: "X km", duration: "Y mins" }
+                                    user2: response2.data,
+                                },
+                            };
+                        } catch (error) {
+                            console.error(
+                                "Error fetching distance info:",
+                                error
+                            );
+                            return venue;
+                        }
+                    })
+                );
+
+                console.log("aghsasdh", venuesWithDistance);
+
+                setNearbyVenues(venuesWithDistance);
+
+                if (venuesWithDistance.length > 0) {
                     setMapCenter(midpoint);
                     setMapZoom(12);
                     // Mark the form as submitted to trigger the new layout
@@ -240,6 +333,17 @@ function MeetingPage() {
         } catch (error) {
             console.error("Error fetching nearby places:", error);
         }
+    };
+
+    // Toggle the dropdown list.
+    const toggleDropdown = () => {
+        setIsOpen((prev) => !prev);
+    };
+
+    // Handle selecting a friend.
+    const handleSelectFriend = (friend) => {
+        dispatch(setSelectedFriend(friend));
+        setIsOpen(false);
     };
 
     // Layout: If the form has been submitted, display a two-column layout:
@@ -294,13 +398,110 @@ function MeetingPage() {
                                 key={index}
                                 className="mb-4 p-3 bg-white rounded shadow"
                             >
-                                <p className="font-semibold">{venue.name}</p>
-                                <p className="text-sm text-gray-600">
-                                    {venue.vicinity}
-                                </p>
-                                <p className="text-sm">
-                                    Rating: {venue.rating}
-                                </p>
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        {/* {console.log(venue)} */}
+                                        <p
+                                            className="font-semibold"
+                                            onClick={() =>
+                                                navigateTo(
+                                                    `/place/${venue.reference}`
+                                                )
+                                            }
+                                        >
+                                            {venue.name}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            {venue.vicinity}
+                                        </p>
+                                        <p className="text-sm">
+                                            Rating: {venue.rating}
+                                        </p>
+                                        {/* Display distance & duration info if available */}
+                                        {venue.distanceInfo &&
+                                            venue.distanceInfo.user1 && (
+                                                <p className="text-xs text-gray-700">
+                                                    From Location 1:{" "}
+                                                    {
+                                                        venue.distanceInfo.user1
+                                                            .distance
+                                                    }{" "}
+                                                    (
+                                                    {
+                                                        venue.distanceInfo.user1
+                                                            .duration
+                                                    }
+                                                    )
+                                                </p>
+                                            )}
+                                        {venue.distanceInfo &&
+                                            venue.distanceInfo.user2 && (
+                                                <p className="text-xs text-gray-700">
+                                                    From Location 2:{" "}
+                                                    {
+                                                        venue.distanceInfo.user2
+                                                            .distance
+                                                    }{" "}
+                                                    (
+                                                    {
+                                                        venue.distanceInfo.user2
+                                                            .duration
+                                                    }
+                                                    )
+                                                </p>
+                                            )}
+                                        <div className="mt-2 flex items-center gap-2">
+                                            <select
+                                                className="p-1 text-sm border rounded"
+                                                defaultValue=""
+                                                onChange={(e) => {
+                                                    const friendId =
+                                                        e.target.value;
+                                                    // Look for the friend using _id instead of userId
+                                                    const friend =
+                                                        allFriends.find(
+                                                            (friend) =>
+                                                                friend._id ===
+                                                                friendId
+                                                        );
+                                                    dispatch(
+                                                        setSelectedFriend(
+                                                            friend
+                                                        )
+                                                    );
+                                                }}
+                                            >
+                                                <option value="">
+                                                    Select friend
+                                                </option>
+                                                {allFriends.map((friend) => (
+                                                    <option
+                                                        key={friend._id}
+                                                        value={friend._id}
+                                                    >
+                                                        {friend.username}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            <button
+                                                onClick={() =>
+                                                    handleShare(venue)
+                                                }
+                                                className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                                            >
+                                                Share
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="ml-4 w-24 h-24">
+                                        <img
+                                            src={getPhotoUrl(venue)}
+                                            alt={venue.name}
+                                            className="w-full h-full object-cover rounded"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>

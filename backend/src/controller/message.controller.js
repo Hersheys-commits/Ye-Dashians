@@ -4,6 +4,7 @@ import { uploadOnCloudinary } from "../util/cloudinary.js";
 import { getReceiverSocketId, io } from "../util/socket.js";
 import { ApiError } from "../util/ApiError.js";
 import { ApiResponse } from "../util/ApiResponse.js";
+import mongoose from "mongoose";
 
 //not to be used now
 
@@ -55,12 +56,59 @@ export const getMessages = async (req, res) => {
     }
 };
 
+export const getLastMessage = async (req, res) => {
+    try {
+        const { id: userToChatId } = req.params;
+        const myId = req.user?._id;
+
+        // Validate and convert IDs
+        if (
+            !mongoose.Types.ObjectId.isValid(myId) ||
+            !mongoose.Types.ObjectId.isValid(userToChatId)
+        ) {
+            return res
+                .status(400)
+                .json(new ApiResponse(400, null, "Invalid user IDs"));
+        }
+
+        const lastMessage =
+            (await Message.findOne({
+                $or: [
+                    {
+                        senderId: myId,
+                        receiverId: userToChatId,
+                    },
+                    {
+                        senderId: userToChatId,
+                        receiverId: myId,
+                    },
+                ],
+            }).sort({ createdAt: -1 })) || {};
+
+        // console.log(lastMessage)
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    lastMessage,
+                    "Last message retrieved successfully"
+                )
+            );
+    } catch (error) {
+        console.log("Error in getLastMessage controller: ", error.message);
+        return res.status(500).json(new ApiError(500, "Internal server error"));
+    }
+};
+
 export const sendMessage = async (req, res) => {
     try {
         const text = req.body.text ? req.body.text : null;
         const imageLocalPath = req?.file?.path || null;
         const { id: receiverId } = req.params;
         const senderId = req.user._id;
+        const isTemplate = req.body.isTemplate;
 
         console.log("Image local path:", imageLocalPath); // Debug log
 
@@ -92,6 +140,7 @@ export const sendMessage = async (req, res) => {
             receiverId,
             text: text,
             image: imageUrl,
+            isTemplate,
         });
 
         await newMessage.save();

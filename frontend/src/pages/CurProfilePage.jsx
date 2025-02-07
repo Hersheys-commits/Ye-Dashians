@@ -388,7 +388,7 @@ function CurrentUserProfilePage() {
                     <div className="flex-1">
                         <div className="flex items-center justify-between mb-4">
                             <h1 className="text-3xl font-bold flex items-center gap-2">
-                                <BsChatHeartFill className="text-secondary" />
+                                {/* <BsChatHeartFill className="text-secondary" /> */}
                                 About Me
                             </h1>
                         </div>

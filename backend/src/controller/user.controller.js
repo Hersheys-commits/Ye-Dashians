@@ -216,6 +216,7 @@ const googleAuth = async (req, res) => {
                             user: user,
                             accessToken,
                             refreshToken,
+                            first: false,
                         },
                         "User logged In Successfully"
                     )
@@ -227,7 +228,8 @@ const googleAuth = async (req, res) => {
                 googleId: sub,
                 username: email,
                 email,
-                avatar: picture,
+                // avatar: picture,
+                first: true,
             });
 
             const { accessToken, refreshToken } =

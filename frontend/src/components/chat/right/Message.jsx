@@ -2,12 +2,29 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { formatMessageTime } from "../../../utils/time";
 import defaultAvatar from "../../../assets/Profile_user.png";
+import { useNavigate } from "react-router-dom";
 
 function Message({ message }) {
     const selectedFriend = useSelector((store) => store.chat.selectedFriend);
-    const userIsSender = message.senderId != selectedFriend._id;
+    const userIsSender = message.senderId !== selectedFriend._id;
     const time = formatMessageTime(message.createdAt);
     const user = JSON.parse(localStorage.getItem("user"));
+    const navigateTo = useNavigate();
+
+    // Helper to render text: if isTemplate is true, render HTML.
+    const renderMessageText = (text) => {
+        if (message.isTemplate) {
+            return (
+                <div
+                    className="inline-block max-w-[500px] break-words"
+                    dangerouslySetInnerHTML={{ __html: text }}
+                />
+            );
+        }
+        return (
+            <div className="inline-block max-w-[500px] break-words">{text}</div>
+        );
+    };
 
     return (
         <div>
@@ -15,7 +32,11 @@ function Message({ message }) {
                 className={`chat ${userIsSender ? "chat-end" : "chat-start"} px-3 pt-3`}
             >
                 <div
-                    className={`chat-bubble ${userIsSender ? "chat-bubble-neutral" : "chat-bubble-info"} ${!message.text ? "p-1" : ""}`}
+                    className={`chat-bubble ${
+                        userIsSender
+                            ? "chat-bubble-neutral"
+                            : "chat-bubble-info"
+                    } ${!message.text || message.isTemplate ? "p-1" : ""}`}
                 >
                     {/* Image only */}
                     {message.image && !message.text && (
@@ -27,11 +48,9 @@ function Message({ message }) {
                     )}
 
                     {/* Text only */}
-                    {message.text && !message.image && (
-                        <div className="inline-block max-w-[500px] break-words">
-                            {message.text}
-                        </div>
-                    )}
+                    {message.text &&
+                        !message.image &&
+                        renderMessageText(message.text)}
 
                     {/* Both image and text */}
                     {message.image && message.text && (
@@ -42,7 +61,15 @@ function Message({ message }) {
                                 className="rounded-lg w-full max-h-[300px] object-contain"
                             />
                             <span className="-mb-1 break-words">
-                                {message.text}
+                                {message.isTemplate ? (
+                                    <span
+                                        dangerouslySetInnerHTML={{
+                                            __html: message.text,
+                                        }}
+                                    />
+                                ) : (
+                                    message.text
+                                )}
                             </span>
                         </div>
                     )}

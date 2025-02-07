@@ -1,4 +1,3 @@
-// socketMiddleware.js
 import io from "socket.io-client";
 import {
     setConnectionStatus,
@@ -6,6 +5,7 @@ import {
     clearSocketState,
 } from "./socketSlice";
 import { addMessage } from "./chatSlice";
+import { updateFriendLastMessage } from "./friendSlice"; // adjust the path as needed
 
 let socket = null; // Keep socket instance outside of Redux
 
@@ -34,11 +34,11 @@ export const initializeSocket = (userId) => (dispatch, getState) => {
         const { selectedFriend } = getState().chat;
 
         /*  
-      Check if the newMessage belongs to the currently active chat.
-      For example, if the logged in user (user2) has selected a friend (user3)
-      then only dispatch messages that involve user3.
-      We assume newMessage has senderId and receiverId fields.
-    */
+          Check if the newMessage belongs to the currently active chat.
+          For example, if the logged in user (user2) has selected a friend (user3)
+          then only dispatch messages that involve user3.
+          We assume newMessage has senderId and receiverId fields.
+        */
         if (
             selectedFriend &&
             (selectedFriend._id === newMessage.senderId ||
@@ -46,6 +46,8 @@ export const initializeSocket = (userId) => (dispatch, getState) => {
         ) {
             dispatch(addMessage(newMessage));
         }
+
+        //Here create a new code so that it appends changes in redux when it gets newMessage
 
         // Notify the sender that the message was received (or perform other actions)
         socket.emit("messageReceived", { messageId: newMessage._id });

@@ -42,7 +42,8 @@ const useGoogleAuth = () => {
             const res = await handleGoogleSignIn(credentialResponse.credential);
 
             if (res?.data?.data?.error !== "email exists") {
-                navigate("/");
+                if (res.data.data?.first == false) navigate("/");
+                else navigate("/questionnaire");
             }
         } catch (error) {
             console.error("Google sign-in error:", error.message);

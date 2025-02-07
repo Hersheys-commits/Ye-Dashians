@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { setSelectedFriend } from "../../../store/chatSlice";
 import { useSocket } from "../../../hooks/socketHook";
 import defaultAvatar from "../../../assets/Profile_user.png";
+import { FaImage } from "react-icons/fa6";
 
 const User = ({ user, header = false }) => {
     const dispatch = useDispatch();
@@ -36,7 +37,11 @@ const User = ({ user, header = false }) => {
                 <div className="font-bold">
                     {user?.fullName || "Harsh Sharma"}
                 </div>
-                {!header && <div>{user?.email || "harshsharma@gmail.com"}</div>}
+                {!header && <div>{user?.email}</div>}
+                {/* {!header && user?.lastMessage!='' && user?.lastImage=='' && <div>{user.lastMessage}</div>} */}
+                {/* {!header && user?.lastMessage=='' && user?.lastImage!='' && <div className="flex flex-row"><FaImage/> IMG</div>}
+                {!header && user?.lastMessage!='' && user?.lastImage!='' && <div className="flex flex-row"><FaImage/> {user.lastMessage}</div>} */}
+
                 {header && isOnline && <div>Online</div>}
                 {header && !isOnline && <div>Offline</div>}
             </div>

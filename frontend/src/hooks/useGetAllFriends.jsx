@@ -15,6 +15,7 @@ function useGetAllFriends() {
                         withCredentials: true,
                     }
                 );
+                // console.log(response.data)
                 setAllFriends(response.data);
                 setFriendLoading(false);
             } catch (error) {

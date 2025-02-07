@@ -1,61 +1,63 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Camera, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 import axios from "axios";
-import defaultImage from "../assets/Profile_user.png";
+import defaultProfile from "../assets/Profile_user.png";
+import { useEffect } from "react";
 
-const ProfilePicture = () => {
-    const [authUser, setAuthUser] = useState(() => {
-        try {
-            return JSON.parse(localStorage.getItem("user")) || null;
-        } catch {
-            return null;
-        }
-    });
+function ProfilePicture() {
+    const authUser = JSON.parse(localStorage.getItem("user"));
+    console.log(authUser);
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-    const [imageError, setImageError] = useState(false);
+    const [selectedImg, setSelectedImg] = useState(null);
+
+    useEffect(() => {
+        setSelectedImg(authUser?.user?.avatar || defaultProfile);
+    }, [authUser]);
 
     const handleImageUpload = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        // File size validation (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert("File size must be less than 5MB");
-            return;
-        }
-
-        setIsUpdatingProfile(true);
-
         try {
+            setIsUpdatingProfile(true);
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // File size validation (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error("File size must be less than 5MB");
+                return;
+            }
+
             const formData = new FormData();
             formData.append("avatar", file);
 
-            const { data: response } = await axios.patch(
+            const response = await axios.patch(
                 "http://localhost:4001/api/users/avatar",
                 formData,
                 {
                     withCredentials: true,
                     headers: {
                         "Content-Type": "multipart/form-data",
+                        // "Authorization": `Bearer ${authUser.accessToken}` // Add token
                     },
                 }
             );
 
-            if (response?.data?.avatar) {
+            if (response.data?.data?.avatar) {
+                // Update local storage with new user data
                 const updatedUser = {
                     ...authUser,
                     user: {
                         ...authUser.user,
-                        avatar: response.data.avatar,
+                        avatar: response.data.data.avatar,
                     },
                 };
                 localStorage.setItem("user", JSON.stringify(updatedUser));
-                setAuthUser(updatedUser);
-                setImageError(false);
+                setSelectedImg(response.data.data.avatar);
+                toast.success("Profile picture updated successfully");
             }
         } catch (error) {
-            console.error("Upload failed:", error);
-            alert(
+            console.error("Upload error:", error);
+            toast.error(
                 error.response?.data?.message ||
                     "Failed to update profile picture"
             );
@@ -65,12 +67,9 @@ const ProfilePicture = () => {
     };
 
     const handleRemoveImage = async () => {
-        if (!authUser?.accessToken) return;
-
-        setIsUpdatingProfile(true);
-
         try {
-            await axios.delete(
+            setIsUpdatingProfile(true);
+            const response = await axios.delete(
                 "http://localhost:4001/api/users/avatar/remove",
                 {
                     withCredentials: true,
@@ -80,18 +79,21 @@ const ProfilePicture = () => {
                 }
             );
 
-            const updatedUser = {
-                ...authUser,
-                user: {
-                    ...authUser.user,
-                    avatar: null,
-                },
-            };
-            localStorage.setItem("user", JSON.stringify(updatedUser));
-            setAuthUser(updatedUser);
+            if (response.data?.data) {
+                // Update local storage
+                const updatedUser = {
+                    ...authUser,
+                    user: {
+                        ...authUser.user,
+                        avatar: null,
+                    },
+                };
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+                setSelectedImg(null);
+                toast.success("Profile picture removed successfully");
+            }
         } catch (error) {
-            console.error("Remove failed:", error);
-            alert(
+            toast.error(
                 error.response?.data?.message ||
                     "Failed to remove profile picture"
             );
@@ -100,35 +102,42 @@ const ProfilePicture = () => {
         }
     };
 
-    const handleImageError = () => {
-        setImageError(true);
-    };
-
-    const getImageSource = () => {
-        if (imageError) return defaultImage;
-        if (!authUser?.user?.avatar) return defaultImage;
-        return authUser.user.avatar;
-    };
-
     return (
-        <div className="flex flex-col items-center gap-4">
-            <div className="relative w-32 h-32">
-                <img
-                    src={getImageSource()}
-                    alt="Profile"
-                    onError={handleImageError}
-                    className="w-full h-full rounded-full object-cover border-4 border-gray-200 "
-                />
+        <div className="flex flex-col items-center gap-4 mr-20">
+            <div className="relative">
+                {console.log(
+                    "Image Source:",
+                    selectedImg ||
+                        authUser?.user?.avatar ||
+                        "/src/assets/Profile_user.png"
+                )}
+                {console.log(selectedImg)}
 
-                <label
-                    htmlFor="avatar-upload"
-                    className={`absolute bottom-0 right-0 bg-gray-800 hover:bg-gray-700 p-2 rounded-full cursor-pointer transition-all duration-200 ${
-                        isUpdatingProfile
-                            ? "opacity-50 pointer-events-none"
+                <img
+                    key={
+                        selectedImg || authUser?.user?.avatar || defaultProfile
+                    }
+                    src={
+                        selectedImg || authUser?.user?.avatar || defaultProfile
+                    }
+                    alt="Profile"
+                    className={`size-32 rounded-full object-cover border-4 ${
+                        !selectedImg && !authUser?.user?.avatar
+                            ? "bg-white"
                             : ""
                     }`}
+                />
+                <label
+                    htmlFor="avatar-upload"
+                    className={`
+                    absolute bottom-0 right-0 
+                    bg-base-content hover:scale-105
+                    p-2 rounded-full cursor-pointer 
+                    transition-all duration-200
+                    ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
+                    `}
                 >
-                    <Camera className="w-5 h-5 text-white" />
+                    <Camera className="w-5 h-5 text-base-200" />
                     <input
                         type="file"
                         id="avatar-upload"
@@ -138,27 +147,28 @@ const ProfilePicture = () => {
                         disabled={isUpdatingProfile}
                     />
                 </label>
-
-                {authUser?.user?.avatar && !imageError && (
+                {/* Delete button - only show if there's a selected or uploaded image */}
+                {authUser.user.avatar && (
                     <button
                         onClick={handleRemoveImage}
                         disabled={isUpdatingProfile}
-                        className={`absolute bottom-0 left-0 bg-red-500 hover:bg-red-600 p-2 rounded-full cursor-pointer transition-all duration-200 ${
-                            isUpdatingProfile
-                                ? "opacity-50 pointer-events-none"
-                                : ""
-                        }`}
+                        className={`
+                        absolute bottom-0 left-0
+                        bg-red-500 hover:bg-red-600 hover:scale-105
+                        p-2 rounded-full cursor-pointer
+                        transition-all duration-200
+                        ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
+                        `}
                     >
                         <Trash2 className="w-5 h-5 text-white" />
                     </button>
                 )}
             </div>
-
-            {isUpdatingProfile && (
-                <p className="text-sm text-gray-500">Processing...</p>
-            )}
+            <p className="text-sm text-zinc-400">
+                {isUpdatingProfile ? "Processing..." : ""}
+            </p>
         </div>
     );
-};
+}
 
 export default ProfilePicture;

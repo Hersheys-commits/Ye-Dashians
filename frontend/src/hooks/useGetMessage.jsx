@@ -20,7 +20,7 @@ function useGetMessage() {
                         }
                     );
                     dispatch(setMessages(res.data.data));
-                    console.log(res.data.data);
+                    // console.log(res.data.data);
                     setMessageLoading(false);
                 } catch (error) {
                     console.log("Error in fetching messages:", error);

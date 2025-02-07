@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
@@ -8,36 +8,20 @@ import Cookies from "js-cookie";
 
 const Header = () => {
     const navigateTo = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
 
-    // const { isLoggedIn, userInfo } = useSelector((store) => store.auth);
+    // Retrieve user info from localStorage.
     const userInfo = JSON.parse(localStorage.getItem("user"));
-    var isLoggedIn = false;
+    let isLoggedIn = false;
     if (userInfo && Cookies.get("accessToken")) isLoggedIn = true;
-
-    // const persistLoaded = useSelector((state) => state._persist?.rehydrated);
-
-    // if (!persistLoaded) {
-    //   return (
-    //     <header className="navbar bg-base-100 skeleton">
-    //       <div className="navbar-start">
-    //         <div className="skeleton w-32 h-8"></div>
-    //       </div>
-    //       <div className="navbar-end">
-    //         <div className="skeleton w-24 h-10"></div>
-    //       </div>
-    //     </header>
-    //   );
-    // }
 
     const handleLogout = async () => {
         try {
             await axios.post(
                 "http://localhost:4001/api/users/logout",
                 {},
-                {
-                    withCredentials: true,
-                }
+                { withCredentials: true }
             );
 
             dispatch(logout());
@@ -79,7 +63,7 @@ const Header = () => {
                     className="btn btn-ghost text-xl text-primary cursor-pointer"
                     onClick={() => navigateTo("/")}
                 >
-                    YeDashians
+                    Nexus
                 </div>
             </div>
 
@@ -125,11 +109,22 @@ const Header = () => {
                             tabIndex={0}
                             className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
                         >
-                            <li>
-                                <a onClick={() => navigateTo("/user/profile")}>
-                                    Profile
-                                </a>
-                            </li>
+                            {/* Only render the Profile link if we are NOT already on the profile page */}
+                            {location.pathname !== "/" && (
+                                <li>
+                                    <Link to="/">Home</Link>
+                                </li>
+                            )}
+                            {location.pathname !== "/user/profile" && (
+                                <li>
+                                    <Link to="/user/profile">Profile</Link>
+                                </li>
+                            )}
+                            {location.pathname !== "/message" && (
+                                <li>
+                                    <Link to="/message">Chat</Link>
+                                </li>
+                            )}
                             <li>
                                 <a
                                     className="text-error"

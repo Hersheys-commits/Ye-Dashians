@@ -11,6 +11,7 @@ import UserProfilePage from "./pages/ProfilePage";
 import CurrentUserProfilePage from "./pages/CurProfilePage";
 import Chat from "./pages/Chat";
 import Questionnaire from "./pages/Questionnaire";
+import PlaceDetailsPage from "./pages/PlaceDetailsPage";
 
 function App() {
     const userInfo = JSON.parse(localStorage.getItem("user"));
@@ -33,6 +34,7 @@ function App() {
                     path="/profile/:username"
                     element={<UserProfilePage />}
                 />
+                <Route path="/place/:place_id" element={<PlaceDetailsPage />} />
                 <Route
                     path="/user/profile"
                     element={<CurrentUserProfilePage />}

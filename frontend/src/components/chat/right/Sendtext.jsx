@@ -48,6 +48,7 @@ function Sendtext() {
         await sendMessage({
             text: data.message,
             image: selectedImage,
+            isTemplate: false,
         });
 
         reset();
