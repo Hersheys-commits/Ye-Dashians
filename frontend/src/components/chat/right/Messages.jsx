@@ -12,7 +12,6 @@ function Messages() {
     const lastMessageRef = useRef(null);
     useGetSocketMessage();
 
-    // Move useEffect after all hooks are defined
     useEffect(() => {
         setTimeout(() => {
             if (lastMessageRef.current) {
@@ -23,32 +22,34 @@ function Messages() {
 
     if (!selectedFriend) {
         return (
-            <div>
-                <p className="text-center mt-[20%]">Welcome!!!!!</p>
+            <div className="flex items-center justify-center h-full bg-base-200">
+                <p className="text-center text-lg text-base-content">
+                    Welcome! Select a chat to start messaging.
+                </p>
             </div>
         );
     }
 
     if (messageLoading) {
         return (
-            <div>
-                <Loading tail="flex justify-center items-center mt-10" />
+            <div className="flex justify-center items-center mt-10">
+                <Loading tail="flex justify-center items-center" />
             </div>
         );
     }
 
     return (
         <div
-            className="flex-1 overflow-y-auto"
+            className="flex-1 overflow-y-auto bg-base-100"
             style={{ minHeight: "calc(84vh - 8vh)" }}
         >
             {!messageLoading && messages.length === 0 && (
-                <div className="text-center mt-[20%]">
+                <div className="text-center mt-10 text-base-content">
                     Say! Hi to start conversation
                 </div>
             )}
 
-            {messages.map((message, index) => (
+            {messages.map((message) => (
                 <div key={message._id} ref={lastMessageRef}>
                     <Message message={message} />
                 </div>

@@ -120,7 +120,11 @@ function MeetingPage() {
           <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
             <div class="md:flex">
               <div class="p-6">
-                <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">${venue.name}</div>
+                <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
+                    <a href="/place/${place.reference}" class="hover:underline">
+                        ${place.name}
+                    </a>
+                </div>
                 <p class="block mt-1 text-lg leading-tight font-medium text-black">${venue.vicinity}</p>
                 <p class="mt-2 text-gray-500">Rating: ${venue.rating}</p>
                 ${
@@ -335,17 +339,6 @@ function MeetingPage() {
         }
     };
 
-    // Toggle the dropdown list.
-    const toggleDropdown = () => {
-        setIsOpen((prev) => !prev);
-    };
-
-    // Handle selecting a friend.
-    const handleSelectFriend = (friend) => {
-        dispatch(setSelectedFriend(friend));
-        setIsOpen(false);
-    };
-
     // Layout: If the form has been submitted, display a two-column layout:
     // Left: Map (70%), Right: Venue List (30%)
     // Otherwise, the map takes the full width.
@@ -381,7 +374,7 @@ function MeetingPage() {
                             {nearbyVenues.map((venue, index) => (
                                 <Marker
                                     key={index}
-                                    position={venue.location}
+                                    position={venue.geometry.location}
                                     icon={{
                                         url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
                                     }}

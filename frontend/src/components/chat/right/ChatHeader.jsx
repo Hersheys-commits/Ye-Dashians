@@ -6,7 +6,7 @@ function ChatHeader() {
     const selectedFriend = useSelector((state) => state.chat.selectedFriend);
 
     return (
-        <div className="flex justify-center bg-slate-600">
+        <div className="flex justify-center bg-base-300">
             <User user={selectedFriend} header={true} />
         </div>
     );

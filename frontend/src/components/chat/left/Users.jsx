@@ -5,15 +5,15 @@ import useGetFriendsWithLastMessages from "../../../hooks/useGetFriendsWithLastM
 import Loading from "../../Loading";
 
 function Users() {
-    const [allFriends, friendLoading] = useGetAllFriends();
-    const [friendsWithMessages, messagesLoading, setFriendsWithMessages] =
+    const [allFriends] = useGetAllFriends();
+    const [friendsWithMessages, messagesLoading] =
         useGetFriendsWithLastMessages();
 
-    // console.log(friendsWithMessages);
+    console.log(allFriends);
     if (messagesLoading) {
         return (
             <div>
-                <div className="my-2 p-1 pl-3 bg-slate-600 rounded-lg">
+                <div className="my-2 p-1 pl-3 bg-base-300 rounded-lg text-base-content">
                     Messages
                 </div>
 
@@ -26,16 +26,16 @@ function Users() {
 
     return (
         <div>
-            <div className="my-2 p-1 pl-3 bg-slate-600 rounded-lg">
+            <div className="my-2 p-1 pl-3 bg-base-300 rounded-lg text-base-content">
                 Messages
             </div>
             <div
                 className="flex-1 overflow-y-auto"
                 style={{ maxHeight: "calc(75vh)" }}
             >
-                {allFriends.map((friend, index) => {
-                    return <User key={index} user={friend} />;
-                })}
+                {allFriends.map((friend, index) => (
+                    <User key={index} user={friend} />
+                ))}
             </div>
         </div>
     );

@@ -1,10 +1,12 @@
-import { useState } from "react";
-import "./App.css";
-import LoginPage from "./pages/LoginPage";
+import React from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import { Toaster } from "react-hot-toast";
+
+// Import your pages
+import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import PageNotFound from "./pages/PageNotFound";
-import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import MeetingPage from "./pages/MeetingPage";
 import UserProfilePage from "./pages/ProfilePage";
@@ -12,34 +14,125 @@ import CurrentUserProfilePage from "./pages/CurProfilePage";
 import Chat from "./pages/Chat";
 import Questionnaire from "./pages/Questionnaire";
 import PlaceDetailsPage from "./pages/PlaceDetailsPage";
+import SettingsPage from "./pages/SettingsPage";
+
+// Wrapper for protected routes (user must be logged in)
+function ProtectedRoute({ children }) {
+    const userInfo = JSON.parse(localStorage.getItem("user"));
+    const accessToken = Cookies.get("accessToken");
+
+    if (!userInfo || !accessToken) {
+        return <Navigate to="/login" replace />;
+    }
+    return children;
+}
+
+// Wrapper for public routes (user must not be logged in)
+function PublicRoute({ children }) {
+    const userInfo = JSON.parse(localStorage.getItem("user"));
+    const accessToken = Cookies.get("accessToken");
+
+    if (userInfo && accessToken) {
+        return <Navigate to="/" replace />;
+    }
+    return children;
+}
 
 function App() {
-    const userInfo = JSON.parse(localStorage.getItem("user"));
-    var isLoggedIn = false;
-    if (userInfo) isLoggedIn = true;
-
     return (
         <div>
             <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/questionnaire" element={<Questionnaire />} />
-                <Route path="/login" element={<LoginPage />} />
+                {/* Public Routes */}
+                <Route
+                    path="/login"
+                    element={
+                        <PublicRoute>
+                            <LoginPage />
+                        </PublicRoute>
+                    }
+                />
+                <Route
+                    path="/signup"
+                    element={
+                        <PublicRoute>
+                            <SignupPage />
+                        </PublicRoute>
+                    }
+                />
+
+                {/* Protected Routes */}
+                <Route
+                    path="/questionnaire"
+                    element={
+                        <ProtectedRoute>
+                            <Questionnaire />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/"
+                    element={
+                        <ProtectedRoute>
+                            <HomePage />
+                        </ProtectedRoute>
+                    }
+                />
                 <Route
                     path="/message"
-                    element={isLoggedIn ? <Chat /> : <Navigate to={"/login"} />}
+                    element={
+                        <ProtectedRoute>
+                            <Chat />
+                        </ProtectedRoute>
+                    }
                 />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/meeting" element={<MeetingPage />} />
+                <Route
+                    path="/meeting"
+                    element={
+                        <ProtectedRoute>
+                            <MeetingPage />
+                        </ProtectedRoute>
+                    }
+                />
                 <Route
                     path="/profile/:username"
-                    element={<UserProfilePage />}
+                    element={
+                        <ProtectedRoute>
+                            <UserProfilePage />
+                        </ProtectedRoute>
+                    }
                 />
-                <Route path="/place/:place_id" element={<PlaceDetailsPage />} />
+                <Route
+                    path="/place/:place_id"
+                    element={
+                        <ProtectedRoute>
+                            <PlaceDetailsPage />
+                        </ProtectedRoute>
+                    }
+                />
                 <Route
                     path="/user/profile"
-                    element={<CurrentUserProfilePage />}
+                    element={
+                        <ProtectedRoute>
+                            <CurrentUserProfilePage />
+                        </ProtectedRoute>
+                    }
                 />
-                <Route path="*" element={<PageNotFound />} />
+                <Route
+                    path="*"
+                    element={
+                        <ProtectedRoute>
+                            <PageNotFound />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/settings"
+                    element={
+                        <ProtectedRoute>
+                            <SettingsPage />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
             <Toaster />
         </div>

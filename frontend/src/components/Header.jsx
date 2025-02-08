@@ -125,6 +125,11 @@ const Header = () => {
                                     <Link to="/message">Chat</Link>
                                 </li>
                             )}
+                            {location.pathname !== "/settings" && (
+                                <li>
+                                    <Link to="/settings">Settings</Link>
+                                </li>
+                            )}
                             <li>
                                 <a
                                     className="text-error"

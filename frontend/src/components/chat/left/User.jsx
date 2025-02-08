@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
 import { setSelectedFriend } from "../../../store/chatSlice";
 import { useSocket } from "../../../hooks/socketHook";
@@ -19,13 +19,15 @@ const User = ({ user, header = false }) => {
 
     return (
         <div
-            className={`flex py-2 pr-2 ${!header ? "hover:bg-slate-600 duration-300 cursor-pointer" : ""} ${isSelected && !header ? "bg-slate-800" : ""}`}
+            className={`flex py-2 pr-2 ${!header ? "hover:bg-base-300 duration-300 cursor-pointer" : ""} ${
+                isSelected && !header ? "bg-base-200" : ""
+            }`}
             onClick={handleUserClick}
         >
             <div
                 className={`avatar ${isOnline ? "avatar-online" : "avatar-offline"} w-10 h-10 mx-2`}
             >
-                <div className="w-24 rounded-full bg-white">
+                <div className="w-10 rounded-full bg-base-100">
                     <img
                         src={user?.avatar ? user.avatar : defaultAvatar}
                         alt={user?.fullName || "User Avatar"}
@@ -34,16 +36,18 @@ const User = ({ user, header = false }) => {
                 </div>
             </div>
             <div className="flex flex-col text-sm pl-1">
-                <div className="font-bold">
-                    {user?.fullName || "Harsh Sharma"}
+                <div className="font-bold text-base-content">
+                    {user?.fullName || "User"}
                 </div>
-                {!header && <div>{user?.email}</div>}
-                {/* {!header && user?.lastMessage!='' && user?.lastImage=='' && <div>{user.lastMessage}</div>} */}
-                {/* {!header && user?.lastMessage=='' && user?.lastImage!='' && <div className="flex flex-row"><FaImage/> IMG</div>}
-                {!header && user?.lastMessage!='' && user?.lastImage!='' && <div className="flex flex-row"><FaImage/> {user.lastMessage}</div>} */}
-
-                {header && isOnline && <div>Online</div>}
-                {header && !isOnline && <div>Offline</div>}
+                {!header && (
+                    <div className="text-base-content/70">{user?.email}</div>
+                )}
+                {header && isOnline && (
+                    <div className="text-green-500">Online</div>
+                )}
+                {header && !isOnline && (
+                    <div className="text-red-500">Offline</div>
+                )}
             </div>
         </div>
     );

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { ChevronLeft, ChevronRight, Globe, Phone, Share2 } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-import { setSelectedFriend } from "../store/chatSlice"; // adjust the path as needed
+import { useDispatch } from "react-redux";
+import { setSelectedFriend } from "../store/chatSlice";
 import useSendMessage from "../hooks/useSendMessage";
 import toast from "react-hot-toast";
 import Header from "../components/Header";
@@ -15,14 +15,10 @@ const PlaceDetailsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-    const { selectedFriend, onlineUsers } = useSocket();
-
+    const { selectedFriend } = useSocket();
     const { place_id } = useParams();
-    const user = JSON.parse(localStorage.getItem("user"));
     const [allFriends, friendLoading] = useGetAllFriends();
-
     const dispatch = useDispatch();
-    //   const selectedFriend = useSelector((store) => store.chat.selectedFriend);
     const { sendMessage } = useSendMessage();
 
     useEffect(() => {
@@ -184,18 +180,15 @@ const PlaceDetailsPage = () => {
     };
 
     return (
-        <div>
+        <div className="bg-base-100 min-h-screen">
             <Header />
-            <div
-                data-theme="dark"
-                className="min-h-screen bg-base-200 text-base-content"
-            >
-                {/* Header */}
-                <div className="bg-base-100 shadow-lg p-6">
+            <div className="bg-base-100 text-base-content">
+                {/* Header Section */}
+                <div className="bg-base-200 shadow-lg p-6">
                     <div className="flex justify-between items-start max-w-6xl mx-auto">
                         <div className="flex-1">
-                            <h1 className="text-3xl font-bold">
-                                {placeDetails.name}
+                            <h1 className="text-3xl font-bold text-base-content">
+                                {placeDetails?.name}
                             </h1>
                             <div className="flex items-center mt-2">
                                 <div className="rating rating-sm">
@@ -204,29 +197,28 @@ const PlaceDetailsPage = () => {
                                             key={i}
                                             type="radio"
                                             name="rating-2"
-                                            className="mask mask-star-2 bg-orange-400"
+                                            className="mask mask-star-2 bg-warning"
                                             checked={
                                                 i + 1 ===
-                                                Math.round(placeDetails.rating)
+                                                Math.round(placeDetails?.rating)
                                             }
                                             readOnly
                                         />
                                     ))}
                                 </div>
-                                <span className="ml-2 text-gray-400">
-                                    {placeDetails.rating} (
-                                    {placeDetails.user_ratings_total} reviews)
+                                <span className="ml-2 text-base-content/70">
+                                    {placeDetails?.rating} (
+                                    {placeDetails?.user_ratings_total} reviews)
                                 </span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <select
-                                className="select select-bordered w-48"
-                                value={selectedFriend ? selectedFriend._id : ""}
+                                className="select select-bordered bg-base-300 text-base-content"
+                                value={selectedFriend?._id || ""}
                                 onChange={(e) => {
-                                    const friendId = e.target.value;
                                     const friend = allFriends.find(
-                                        (f) => f._id === friendId
+                                        (f) => f._id === e.target.value
                                     );
                                     dispatch(setSelectedFriend(friend));
                                 }}
@@ -249,8 +241,8 @@ const PlaceDetailsPage = () => {
                 </div>
 
                 {/* Photos Carousel */}
-                {placeDetails.photos && placeDetails.photos.length > 0 && (
-                    <div className="max-w-6xl mx-auto mt-6 bg-base-100 p-4 rounded-lg shadow">
+                {placeDetails?.photos?.length > 0 && (
+                    <div className="max-w-6xl mx-auto mt-6 bg-base-200 p-4 rounded-lg shadow">
                         <div className="relative h-96">
                             <img
                                 src={getPhotoUrl(
@@ -262,13 +254,13 @@ const PlaceDetailsPage = () => {
                             />
                             <button
                                 onClick={handlePrevPhoto}
-                                className="btn btn-circle absolute left-2 top-1/2 -translate-y-1/2"
+                                className="btn btn-circle btn-ghost absolute left-2 top-1/2 -translate-y-1/2 bg-base-300/50 hover:bg-base-300"
                             >
                                 <ChevronLeft />
                             </button>
                             <button
                                 onClick={handleNextPhoto}
-                                className="btn btn-circle absolute right-2 top-1/2 -translate-y-1/2"
+                                className="btn btn-circle btn-ghost absolute right-2 top-1/2 -translate-y-1/2 bg-base-300/50 hover:bg-base-300"
                             >
                                 <ChevronRight />
                             </button>
@@ -276,12 +268,12 @@ const PlaceDetailsPage = () => {
                     </div>
                 )}
 
-                {/* Details Section */}
+                {/* Details Grid */}
                 <div className="max-w-6xl mx-auto mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Opening Hours */}
-                    {placeDetails.opening_hours && (
-                        <div className="bg-base-100 p-6 rounded-lg shadow">
-                            <h2 className="text-xl font-bold mb-4">
+                    {placeDetails?.opening_hours && (
+                        <div className="bg-base-200 p-6 rounded-lg shadow">
+                            <h2 className="text-xl font-bold mb-4 text-base-content">
                                 Opening Hours
                             </h2>
                             <div className="space-y-2">
@@ -289,7 +281,7 @@ const PlaceDetailsPage = () => {
                                     (day, index) => (
                                         <p
                                             key={index}
-                                            className="text-gray-400"
+                                            className="text-base-content/70"
                                         >
                                             {day}
                                         </p>
@@ -300,41 +292,47 @@ const PlaceDetailsPage = () => {
                     )}
 
                     {/* Contact & Additional Info */}
-                    <div className="bg-base-100 p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-bold mb-4">
+                    <div className="bg-base-200 p-6 rounded-lg shadow">
+                        <h2 className="text-xl font-bold mb-4 text-base-content">
                             Additional Information
                         </h2>
-                        <div className="space-y-4">
-                            {placeDetails.formatted_phone_number && (
+                        <div className="space-y-4 text-base-content/70">
+                            {placeDetails?.formatted_phone_number && (
                                 <p className="flex items-center gap-2">
                                     <Phone className="w-4 h-4" />
                                     {placeDetails.formatted_phone_number}
                                 </p>
                             )}
-                            {placeDetails.website && (
+                            {placeDetails?.website && (
                                 <p className="flex items-center gap-2">
                                     <Globe className="w-4 h-4" />
                                     <a
                                         href={placeDetails.website}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-blue-400 hover:underline"
+                                        className="text-primary hover:underline"
                                     >
                                         Visit Website
                                     </a>
                                 </p>
                             )}
                             <p>
-                                <strong>Address:</strong>{" "}
-                                {placeDetails.formatted_address}
+                                <strong className="text-base-content">
+                                    Address:
+                                </strong>{" "}
+                                {placeDetails?.formatted_address}
                             </p>
                             <p>
-                                <strong>Type:</strong>{" "}
-                                {placeDetails.types.join(", ")}
+                                <strong className="text-base-content">
+                                    Type:
+                                </strong>{" "}
+                                {placeDetails?.types.join(", ")}
                             </p>
-                            {placeDetails.price_level && (
+                            {placeDetails?.price_level && (
                                 <p>
-                                    <strong>Price Level:</strong>{" "}
+                                    <strong className="text-base-content">
+                                        Price Level:
+                                    </strong>{" "}
                                     {"$".repeat(placeDetails.price_level)}
                                 </p>
                             )}
@@ -343,31 +341,33 @@ const PlaceDetailsPage = () => {
                 </div>
 
                 {/* Reviews Section */}
-                {placeDetails?.reviews && placeDetails?.reviews.length > 0 && (
+                {placeDetails?.reviews?.length > 0 && (
                     <div className="max-w-6xl mx-auto mt-6 mb-6">
-                        <div className="bg-base-100 p-6 rounded-lg shadow">
-                            <h2 className="text-xl font-bold mb-4">Reviews</h2>
+                        <div className="bg-base-200 p-6 rounded-lg shadow">
+                            <h2 className="text-xl font-bold mb-4 text-base-content">
+                                Reviews
+                            </h2>
                             <div className="space-y-6">
-                                {placeDetails?.reviews.map((review, index) => (
+                                {placeDetails.reviews.map((review, index) => (
                                     <div
                                         key={index}
-                                        className="border-b last:border-b-0 pb-4"
+                                        className="border-base-content/10 border-b last:border-b-0 pb-4"
                                     >
                                         <div className="flex items-start gap-4">
                                             <img
-                                                src={review?.profile_photo_url}
-                                                alt={review?.author_name}
-                                                className="w-12 h-12 rounded-full bg-white"
+                                                src={review.profile_photo_url}
+                                                alt={review.author_name}
+                                                className="w-12 h-12 rounded-full bg-base-300"
                                                 onError={(e) => {
-                                                    e.target.onerror = null; // prevent infinite loop if fallback fails
+                                                    e.target.onerror = null;
                                                     e.target.src =
                                                         "/src/assets/Profile_user.png";
                                                 }}
                                             />
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between">
-                                                    <h3 className="font-semibold">
-                                                        {review?.author_name}
+                                                    <h3 className="font-semibold text-base-content">
+                                                        {review.author_name}
                                                     </h3>
                                                     <div className="rating rating-sm">
                                                         {[...Array(5)].map(
@@ -376,11 +376,11 @@ const PlaceDetailsPage = () => {
                                                                     key={i}
                                                                     type="radio"
                                                                     name={`rating-${index}`}
-                                                                    className="mask mask-star-2 bg-orange-400"
+                                                                    className="mask mask-star-2 bg-warning"
                                                                     checked={
                                                                         i +
                                                                             1 ===
-                                                                        review?.rating
+                                                                        review.rating
                                                                     }
                                                                     readOnly
                                                                 />
@@ -388,12 +388,12 @@ const PlaceDetailsPage = () => {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <p className="text-gray-400 mt-1">
-                                                    {review?.text}
+                                                <p className="text-base-content/70 mt-1">
+                                                    {review.text}
                                                 </p>
-                                                <p className="text-sm text-gray-500 mt-2">
+                                                <p className="text-sm text-base-content/50 mt-2">
                                                     {
-                                                        review?.relative_time_description
+                                                        review.relative_time_description
                                                     }
                                                 </p>
                                             </div>

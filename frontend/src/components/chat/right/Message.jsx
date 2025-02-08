@@ -1,84 +1,66 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { formatMessageTime } from "../../../utils/time";
-import defaultAvatar from "../../../assets/Profile_user.png";
 import { useNavigate } from "react-router-dom";
 
 function Message({ message }) {
     const selectedFriend = useSelector((store) => store.chat.selectedFriend);
+    // Assume the current user is the sender if message.senderId does NOT match the selected friend's id.
     const userIsSender = message.senderId !== selectedFriend._id;
     const time = formatMessageTime(message.createdAt);
-    const user = JSON.parse(localStorage.getItem("user"));
     const navigateTo = useNavigate();
 
-    // Helper to render text: if isTemplate is true, render HTML.
-    const renderMessageText = (text) => {
-        if (message.isTemplate) {
-            return (
-                <div
-                    className="inline-block max-w-[500px] break-words"
-                    dangerouslySetInnerHTML={{ __html: text }}
-                />
-            );
-        }
+    // Render the message content (supports text and image)
+    // If both image and text exist, image is rendered above the text.
+    const renderContent = () => {
         return (
-            <div className="inline-block max-w-[500px] break-words">{text}</div>
+            <>
+                {message.image && (
+                    <img
+                        src={message.image}
+                        alt="Message"
+                        className="rounded-lg w-full max-h-[300px] object-contain mb-2"
+                    />
+                )}
+                {message.text && (
+                    <p className="text-sm">
+                        {message.isTemplate ? (
+                            <span
+                                dangerouslySetInnerHTML={{
+                                    __html: message.text,
+                                }}
+                            />
+                        ) : (
+                            message.text
+                        )}
+                    </p>
+                )}
+            </>
         );
     };
 
     return (
-        <div>
+        <div className="px-3 pt-3">
+            {/* Message Bubble */}
             <div
-                className={`chat ${userIsSender ? "chat-end" : "chat-start"} px-3 pt-3`}
+                className={`flex ${userIsSender ? "justify-end" : "justify-start"}`}
             >
                 <div
-                    className={`chat-bubble ${
-                        userIsSender
-                            ? "chat-bubble-neutral"
-                            : "chat-bubble-info"
-                    } ${!message.text || message.isTemplate ? "p-1" : ""}`}
+                    className={`
+            max-w-[80%] rounded-xl p-3 shadow-sm
+            ${userIsSender ? "bg-primary text-primary-content" : "bg-base-200 text-base-content"}
+          `}
                 >
-                    {/* Image only */}
-                    {message.image && !message.text && (
-                        <img
-                            src={message.image}
-                            alt="Message"
-                            className="rounded-lg max-w-[200px] max-h-[300px] object-contain"
-                        />
-                    )}
-
-                    {/* Text only */}
-                    {message.text &&
-                        !message.image &&
-                        renderMessageText(message.text)}
-
-                    {/* Both image and text */}
-                    {message.image && message.text && (
-                        <div className="flex flex-col -mx-3 -mt-1 max-w-[200px]">
-                            <img
-                                src={message.image}
-                                alt="Message"
-                                className="rounded-lg w-full max-h-[300px] object-contain"
-                            />
-                            <span className="-mb-1 break-words">
-                                {message.isTemplate ? (
-                                    <span
-                                        dangerouslySetInnerHTML={{
-                                            __html: message.text,
-                                        }}
-                                    />
-                                ) : (
-                                    message.text
-                                )}
-                            </span>
-                        </div>
-                    )}
+                    {renderContent()}
+                    <p
+                        className={`
+              text-[10px] mt-1.5
+              ${userIsSender ? "text-primary-content/70" : "text-base-content/70"}
+            `}
+                    >
+                        {time}
+                    </p>
                 </div>
-            </div>
-            <div
-                className={`mx-5 ${userIsSender ? "flex flex-row-reverse" : ""}`}
-            >
-                <p className="text-sm text-slate-400">{time}</p>
             </div>
         </div>
     );

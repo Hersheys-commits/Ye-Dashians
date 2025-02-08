@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 function Search() {
     const [search, setSearch] = useState("");
     const [allFriends, friendLoading] = useGetAllFriends();
-    console.log(allFriends);
     const dispatch = useDispatch();
 
     const handleSubmit = (e) => {
@@ -24,22 +23,26 @@ function Search() {
             toast.error("User not found");
         }
     };
+
     return (
-        <div className=" h-[10vh]">
+        <div className="h-[10vh]">
             <div className="px-6 py-4">
                 <form onSubmit={handleSubmit}>
                     <div className="flex space-x-3">
-                        <label className=" border-[1px] border-gray-700 bg-slate-900 rounded-lg p-3 flex items-center gap-2 w-[80%]">
+                        <label className="join w-[80%]">
+                            <span className="join-item flex items-center px-3 bg-base-200 border border-base-300 rounded-lg">
+                                <FaSearch className="w-5 h-5 text-base-content/50" />
+                            </span>
                             <input
                                 type="text"
-                                className="grow outline-none bg-transparent border-0"
+                                className="join-item input input-bordered grow outline-none bg-transparent border-0"
                                 placeholder="Search"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </label>
-                        <button>
-                            <FaSearch className="text-4xl p-2 hover:bg-gray-600 rounded-full duration-300" />
+                        <button className="btn btn-ghost">
+                            <FaSearch className="text-4xl p-2 hover:bg-base-300 rounded-full duration-300" />
                         </button>
                     </div>
                 </form>

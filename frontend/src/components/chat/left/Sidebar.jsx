@@ -4,7 +4,7 @@ import Users from "./Users";
 
 function Sidebar() {
     return (
-        <div className="w-[30%] bg-black">
+        <div className="w-[30%] bg-base-200">
             <Search />
             <Users />
         </div>

@@ -4,6 +4,7 @@ import { FaImage } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import useSendMessage from "../../../hooks/useSendMessage";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 function Sendtext() {
     const { sendMessageLoading, sendMessage } = useSendMessage();
@@ -19,14 +20,11 @@ function Sendtext() {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         if (!file.type.startsWith("image/")) {
             toast.error("Please select an image file");
             return;
         }
-
         setSelectedImage(file);
-
         const reader = new FileReader();
         reader.onloadend = () => {
             setImagePreview(reader.result);
@@ -44,13 +42,11 @@ function Sendtext() {
 
     const onSubmit = async (data) => {
         if (!data.message && !selectedImage) return;
-
         await sendMessage({
             text: data.message,
             image: selectedImage,
             isTemplate: false,
         });
-
         reset();
         removeImage();
     };
@@ -63,11 +59,11 @@ function Sendtext() {
                         <img
                             src={imagePreview}
                             alt="Preview"
-                            className="w-20 h-20 object-cover rounded-lg border border-gray-700"
+                            className="w-20 h-20 object-cover rounded-lg border border-base-300"
                         />
                         <button
                             onClick={removeImage}
-                            className="absolute -top-2 -right-2 bg-gray-800 rounded-full p-1"
+                            className="absolute -top-2 -right-2 bg-base-200 rounded-full p-1"
                             type="button"
                         >
                             <IoMdClose className="text-white" />
@@ -75,15 +71,14 @@ function Sendtext() {
                     </div>
                 </div>
             )}
-
             <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="flex space-x-1 h-[8vh] bg-gray-800">
+                <div className="flex space-x-1 h-[8vh] bg-base-200">
                     <div className="w-[70%] mx-4">
                         <input
                             type="text"
                             placeholder="Type here"
                             {...register("message")}
-                            className="border border-gray-700 rounded-xl outline-none mt-1 px-4 py-3 w-full"
+                            className="input input-bordered w-full outline-none mt-1 px-4 py-3 bg-transparent"
                         />
                     </div>
                     <input
@@ -96,14 +91,22 @@ function Sendtext() {
                     <button
                         type="button"
                         onClick={handleImageClick}
-                        className={`${imagePreview ? "text-blue-500" : "text-gray-400"} hover:text-blue-500 transition-colors`}
+                        className={`hover:text-blue-500 transition-colors ${
+                            imagePreview
+                                ? "text-blue-500"
+                                : "text-base-content/50"
+                        }`}
                     >
                         <FaImage className="text-3xl mr-6 ml-2" />
                     </button>
                     <button
                         type="submit"
                         disabled={sendMessageLoading}
-                        className={`${!register("message") && !selectedImage ? "text-gray-500" : "text-blue-500"} hover:text-blue-600 transition-colors`}
+                        className={`hover:text-blue-600 transition-colors ${
+                            !register("message") && !selectedImage
+                                ? "text-base-content/50"
+                                : "text-blue-500"
+                        }`}
                     >
                         <IoSend className="text-3xl" />
                     </button>
