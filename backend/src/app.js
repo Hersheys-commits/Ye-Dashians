@@ -16,9 +16,9 @@ const allowedOrigins = [
 
 app.use(
     cors({
-        origin: "http://localhost:5173",
-        credentials: true, // Enable sending cookies, authorization headers, etc.
-      })
+        origin: "https://nexus-tau-seven.vercel.app", // Allow requests from your frontend
+        credentials: true, // Allow cookies
+    })
 );
 
 app.use(express.json({ limit: "16kb" }));
