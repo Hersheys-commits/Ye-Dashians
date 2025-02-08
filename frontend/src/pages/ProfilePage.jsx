@@ -22,7 +22,7 @@ function UserProfilePage() {
         const fetchUserProfile = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:4001/api/friends/profile/${username}`,
+                    `https://nexus-xwdr.onrender.com/api/friends/profile/${username}`,
                     {
                         withCredentials: true,
                         timeout: 5000,
@@ -53,7 +53,7 @@ function UserProfilePage() {
         setIsLoading(true);
         try {
             const response = await axios.post(
-                `http://localhost:4001/api/friends/friend-request/${username}`,
+                `https://nexus-xwdr.onrender.com/api/friends/friend-request/${username}`,
                 {},
                 {
                     withCredentials: true,
@@ -79,7 +79,7 @@ function UserProfilePage() {
         setIsLoading(true);
         try {
             const response = await axios.delete(
-                `http://localhost:4001/api/friends/cancel-request/${username}`,
+                `https://nexus-xwdr.onrender.com/api/friends/cancel-request/${username}`,
                 {
                     withCredentials: true,
                 }

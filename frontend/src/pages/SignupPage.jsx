@@ -20,7 +20,7 @@ const SignupPage = () => {
         const { fullName, username, email, password } = data;
         try {
             const response = await axios.post(
-                "http://localhost:4001/api/users/register",
+                "https://nexus-xwdr.onrender.com/api/users/register",
                 { fullName, username, email, password },
                 {
                     withCredentials: true,

@@ -26,7 +26,7 @@ const PlaceDetailsPage = () => {
             try {
                 setLoading(true);
                 const response = await axios.get(
-                    `http://localhost:4001/api/place/${place_id}`,
+                    `https://nexus-xwdr.onrender.com/api/place/${place_id}`,
                     {
                         withCredentials: true,
                     }

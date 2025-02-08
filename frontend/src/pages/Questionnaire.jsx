@@ -60,7 +60,7 @@ function Questionnaire() {
     const onSubmitPersonal = async (data) => {
         try {
             const response = await axios.patch(
-                "http://localhost:4001/api/users/update-account-question",
+                "https://nexus-xwdr.onrender.com/api/users/update-account-question",
                 data,
                 { withCredentials: true }
             );
@@ -75,7 +75,7 @@ function Questionnaire() {
     const onSubmitPlaces = async (data) => {
         try {
             const response = await axios.post(
-                "http://localhost:4001/api/users/update-preferences",
+                "https://nexus-xwdr.onrender.com/api/users/update-preferences",
                 { preferences: data },
                 { withCredentials: true }
             );
@@ -91,7 +91,7 @@ function Questionnaire() {
     const onSubmitBio = async (data) => {
         try {
             const response = await axios.post(
-                "http://localhost:4001/api/users/update-bio",
+                "https://nexus-xwdr.onrender.com/api/users/update-bio",
                 data,
                 { withCredentials: true }
             );

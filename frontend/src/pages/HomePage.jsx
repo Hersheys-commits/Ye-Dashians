@@ -37,7 +37,7 @@ function HomePage() {
     const dataSave = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:4001/api/users/profile",
+                "https://nexus-xwdr.onrender.com/api/users/profile",
                 {
                     withCredentials: true,
                 }
@@ -98,7 +98,7 @@ function HomePage() {
             try {
                 // Adjust the endpoint as needed. This is an example URL.
                 const response = await axios.get(
-                    `http://localhost:4001/api/places/autocomplete?query=${value}`,
+                    `https://nexus-xwdr.onrender.com/api/places/autocomplete?query=${value}`,
                     { withCredentials: true }
                 );
                 setPlaceSuggestions(response.data.data || []);

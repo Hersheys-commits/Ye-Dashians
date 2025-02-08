@@ -20,7 +20,7 @@ function useGetFriendsWithLastMessages() {
                 const lastMessagesPromises = allFriends.map(async (friend) => {
                     try {
                         const response = await axios.get(
-                            `http://localhost:4001/api/message/getLastMessage/${friend._id}`,
+                            `https://nexus-xwdr.onrender.com/api/message/getLastMessage/${friend._id}`,
                             { withCredentials: true }
                         );
                         const res = {

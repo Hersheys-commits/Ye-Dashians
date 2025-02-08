@@ -12,7 +12,7 @@ let socket = null; // Keep socket instance outside of Redux
 export const initializeSocket = (userId) => (dispatch, getState) => {
     if (socket) return; // Prevent multiple socket connections
 
-    socket = io("http://localhost:4001", {
+    socket = io("https://nexus-xwdr.onrender.com", {
         query: { userId: userId },
     });
 

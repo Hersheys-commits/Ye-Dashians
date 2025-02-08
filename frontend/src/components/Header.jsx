@@ -19,7 +19,7 @@ const Header = () => {
     const handleLogout = async () => {
         try {
             await axios.post(
-                "http://localhost:4001/api/users/logout",
+                "https://nexus-xwdr.onrender.com/api/users/logout",
                 {},
                 { withCredentials: true }
             );

@@ -10,7 +10,7 @@ function useGetAllFriends() {
             setFriendLoading(true);
             try {
                 const response = await axios.get(
-                    "http://localhost:4001/api/message/friends",
+                    "https://nexus-xwdr.onrender.com/api/message/friends",
                     {
                         withCredentials: true,
                     }

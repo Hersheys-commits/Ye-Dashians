@@ -121,8 +121,8 @@ function MeetingPage() {
             <div class="md:flex">
               <div class="p-6">
                 <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-                    <a href="/place/${place.reference}" class="hover:underline">
-                        ${place.name}
+                    <a href="/place/${venue.reference}" class="hover:underline">
+                        ${venue.name}
                     </a>
                 </div>
                 <p class="block mt-1 text-lg leading-tight font-medium text-black">${venue.vicinity}</p>
@@ -255,7 +255,7 @@ function MeetingPage() {
 
         try {
             const response = await axios.get(
-                "http://localhost:4001/api/nearbyplaces",
+                "https://nexus-xwdr.onrender.com/api/nearbyplaces",
                 {
                     params: {
                         location: locationParam,
@@ -279,7 +279,7 @@ function MeetingPage() {
 
                             const [response1, response2] = await Promise.all([
                                 axios.get(
-                                    "http://localhost:4001/api/distance",
+                                    "https://nexus-xwdr.onrender.com/api/distance",
                                     {
                                         params: {
                                             origin: origin1,
@@ -289,7 +289,7 @@ function MeetingPage() {
                                     }
                                 ),
                                 axios.get(
-                                    "http://localhost:4001/api/distance",
+                                    "https://nexus-xwdr.onrender.com/api/distance",
                                     {
                                         params: {
                                             origin: origin2,

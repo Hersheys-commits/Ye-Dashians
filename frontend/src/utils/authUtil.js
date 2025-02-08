@@ -11,7 +11,7 @@ const useGoogleAuth = () => {
     const handleGoogleSignIn = async (tokenId) => {
         try {
             const res = await axios.post(
-                "http://localhost:4001/api/users/google-login",
+                "https://nexus-xwdr.onrender.com/api/users/google-login",
                 { tokenId },
                 { withCredentials: true }
             );

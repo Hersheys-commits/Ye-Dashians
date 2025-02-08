@@ -31,7 +31,7 @@ function ProfilePicture() {
             formData.append("avatar", file);
 
             const response = await axios.patch(
-                "http://localhost:4001/api/users/avatar",
+                "https://nexus-xwdr.onrender.com/api/users/avatar",
                 formData,
                 {
                     withCredentials: true,
@@ -70,7 +70,7 @@ function ProfilePicture() {
         try {
             setIsUpdatingProfile(true);
             const response = await axios.delete(
-                "http://localhost:4001/api/users/avatar/remove",
+                "https://nexus-xwdr.onrender.com/api/users/avatar/remove",
                 {
                     withCredentials: true,
                     headers: {

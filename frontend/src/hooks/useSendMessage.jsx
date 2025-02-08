@@ -24,7 +24,7 @@ function useSendMessage() {
             }
             console.log("selectedFriend", selectedFriend);
             const res = await axios.post(
-                `http://localhost:4001/api/message/sendMessage/${selectedFriend._id}`,
+                `https://nexus-xwdr.onrender.com/api/message/sendMessage/${selectedFriend._id}`,
                 formData,
                 {
                     withCredentials: true,

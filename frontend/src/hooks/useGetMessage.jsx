@@ -14,7 +14,7 @@ function useGetMessage() {
             if (selectedFriend?._id) {
                 try {
                     const res = await axios.get(
-                        `http://localhost:4001/api/message/getMessage/${selectedFriend._id}`,
+                        `https://nexus-xwdr.onrender.com/api/message/getMessage/${selectedFriend._id}`,
                         {
                             withCredentials: true,
                         }

@@ -91,7 +91,7 @@ function CurrentUserProfilePage() {
     const onSubmitBio = async (data) => {
         try {
             const response = await axios.post(
-                "http://localhost:4001/api/users/update-bio",
+                "https://nexus-xwdr.onrender.com/api/users/update-bio",
                 data,
                 { withCredentials: true }
             );
@@ -116,7 +116,7 @@ function CurrentUserProfilePage() {
         try {
             // Patch request to update user data.
             const response = await axios.patch(
-                "http://localhost:4001/api/users/update-account",
+                "https://nexus-xwdr.onrender.com/api/users/update-account",
                 data,
                 { withCredentials: true }
             );
@@ -160,7 +160,7 @@ function CurrentUserProfilePage() {
     const fetchFriendProfile = async (friendId, type) => {
         try {
             const response = await axios.get(
-                `http://localhost:4001/api/friends/getProfileById/${friendId}`,
+                `https://nexus-xwdr.onrender.com/api/friends/getProfileById/${friendId}`,
                 { withCredentials: true }
             );
             if (type === "friend") {
@@ -229,7 +229,7 @@ function CurrentUserProfilePage() {
     const fetchCurrentUserProfile = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:4001/api/users/profile",
+                "https://nexus-xwdr.onrender.com/api/users/profile",
                 { withCredentials: true }
             );
             setProfile(response.data.data);
@@ -264,7 +264,7 @@ function CurrentUserProfilePage() {
 
         try {
             await axios.post(
-                `http://localhost:4001/api/friends/remove-friend`,
+                `https://nexus-xwdr.onrender.com/api/friends/remove-friend`,
                 { friendId },
                 { withCredentials: true }
             );
@@ -292,7 +292,7 @@ function CurrentUserProfilePage() {
     const acceptFriendRequest = async (requestId) => {
         try {
             await axios.post(
-                `http://localhost:4001/api/friends/accept-request`,
+                `https://nexus-xwdr.onrender.com/api/friends/accept-request`,
                 { requestId },
                 { withCredentials: true }
             );
@@ -312,7 +312,7 @@ function CurrentUserProfilePage() {
     const rejectFriendRequest = async (requestId) => {
         try {
             await axios.post(
-                `http://localhost:4001/api/friends/reject-request`,
+                `https://nexus-xwdr.onrender.com/api/friends/reject-request`,
                 { requestId },
                 { withCredentials: true }
             );
@@ -348,7 +348,7 @@ function CurrentUserProfilePage() {
     const onSubmitPlaces = async (data) => {
         try {
             const response = await axios.post(
-                "http://localhost:4001/api/users/update-preferences",
+                "https://nexus-xwdr.onrender.com/api/users/update-preferences",
                 { preferences: data },
                 { withCredentials: true }
             );

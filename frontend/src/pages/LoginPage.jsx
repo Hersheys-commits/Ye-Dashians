@@ -24,7 +24,7 @@ const LoginPage = () => {
         const { email, password } = data;
         try {
             const response = await axios.post(
-                "http://localhost:4001/api/users/login",
+                "https://nexus-xwdr.onrender.com/api/users/login",
                 { email, password },
                 {
                     withCredentials: true,
