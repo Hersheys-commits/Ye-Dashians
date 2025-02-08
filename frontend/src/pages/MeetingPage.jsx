@@ -16,6 +16,7 @@ import { useSocket } from "../hooks/socketHook";
 import toast from "react-hot-toast";
 import useGetAllFriends from "../hooks/useGetAllFriends";
 import { useNavigate } from "react-router-dom";
+import api from "../utils/axiosRequest";
 
 const mapContainerStyle = {
     width: "100%",
@@ -254,17 +255,14 @@ function MeetingPage() {
         const type = venuePreference.toLowerCase();
 
         try {
-            const response = await axios.get(
-                "https://nexus-xwdr.onrender.com/api/nearbyplaces",
-                {
-                    params: {
-                        location: locationParam,
-                        radius: radius,
-                        type: type,
-                    },
-                    withCredentials: true,
-                }
-            );
+            const response = await api.get("/api/nearbyplaces", {
+                params: {
+                    location: locationParam,
+                    radius: radius,
+                    type: type,
+                },
+                withCredentials: true,
+            });
 
             const data = response.data;
 
@@ -278,26 +276,20 @@ function MeetingPage() {
                             const destination = `${venue.geometry.location?.lat},${venue.geometry.location?.lng}`;
 
                             const [response1, response2] = await Promise.all([
-                                axios.get(
-                                    "https://nexus-xwdr.onrender.com/api/distance",
-                                    {
-                                        params: {
-                                            origin: origin1,
-                                            destination: destination,
-                                        },
-                                        withCredentials: true,
-                                    }
-                                ),
-                                axios.get(
-                                    "https://nexus-xwdr.onrender.com/api/distance",
-                                    {
-                                        params: {
-                                            origin: origin2,
-                                            destination: destination,
-                                        },
-                                        withCredentials: true,
-                                    }
-                                ),
+                                api.get("/api/distance", {
+                                    params: {
+                                        origin: origin1,
+                                        destination: destination,
+                                    },
+                                    withCredentials: true,
+                                }),
+                                api.get("/api/distance", {
+                                    params: {
+                                        origin: origin2,
+                                        destination: destination,
+                                    },
+                                    withCredentials: true,
+                                }),
                             ]);
 
                             return {

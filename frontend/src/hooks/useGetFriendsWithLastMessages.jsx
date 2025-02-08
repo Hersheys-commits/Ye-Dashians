@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import useGetAllFriends from "./useGetAllFriends";
 import { useDispatch } from "react-redux";
 import { updateFriendLastMessage } from "../store/friendSlice";
+import api from "../utils/axiosRequest";
 
 function useGetFriendsWithLastMessages() {
     const [allFriends, friendLoading] = useGetAllFriends();
@@ -19,8 +20,8 @@ function useGetFriendsWithLastMessages() {
             try {
                 const lastMessagesPromises = allFriends.map(async (friend) => {
                     try {
-                        const response = await axios.get(
-                            `https://nexus-xwdr.onrender.com/api/message/getLastMessage/${friend._id}`,
+                        const response = await api.get(
+                            `/api/message/getLastMessage/${friend._id}`,
                             { withCredentials: true }
                         );
                         const res = {

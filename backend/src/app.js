@@ -9,11 +9,16 @@ dotenv.config({
     path: "./.env",
 });
 
+const allowedOrigins = [
+    "https://nexus-tau-seven.vercel.app",
+    "http://localhost:5173", // if needed for local development
+  ];
+
 app.use(
     cors({
-        origin: "https://nexus-tau-seven.vercel.app", // Allow requests from your frontend
-        credentials: true, // Allow cookies
-    })
+        origin: "http://localhost:5173",
+        credentials: true, // Enable sending cookies, authorization headers, etc.
+      })
 );
 
 app.use(express.json({ limit: "16kb" }));
@@ -53,7 +58,7 @@ app.get("/api/nearbyplaces", async (req, res) => {
 app.get("/api/place/:placeId", async (req, res) => {
     // Expect query parameters: location, radius, type
     // const { location, radius, type } = req.query;
-    const { placeId } = req.params;
+        const { placeId } = req.params;
     const apiKey = process.env.GOOGLE_MAP_API;
 
     // Construct the URL for the Google Places Nearby Search endpoint
@@ -156,7 +161,5 @@ app.get("/api/places/autocomplete", async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error." });
     }
 });
-
-// http://localhost:8000/api/users/register
 
 export { app };

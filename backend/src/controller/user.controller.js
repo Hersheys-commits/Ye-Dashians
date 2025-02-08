@@ -113,6 +113,8 @@ const loginUser = asyncHandler(async (req, res) => {
     //access and referesh token
     //send cookie
 
+    // console.log("first")
+
     const { email, username, password } = req.body;
 
     if (!username && !email) {
@@ -148,8 +150,11 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 
     const options = {
-        // httpOnly: true,
-        secure: true,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // use secure cookies in production
+        sameSite: "lax", // necessary for cross-site cookies
+        path: "/",
+        maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
     };
 
     return res
@@ -201,8 +206,11 @@ const googleAuth = async (req, res) => {
                 await generateAccessAndRefereshTokens(user._id);
 
             const options = {
-                // httpOnly: true,
-                secure: true,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production", // use secure cookies in production
+                sameSite: "lax", // necessary for cross-site cookies
+                path: "/",
+                maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
             };
 
             return res
@@ -236,8 +244,11 @@ const googleAuth = async (req, res) => {
                 await generateAccessAndRefereshTokens(user._id);
 
             const options = {
-                // httpOnly: true,
-                secure: true,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production", // use secure cookies in production
+                sameSite: "lax", // necessary for cross-site cookies
+                path: "/",
+                maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
             };
 
             return res
@@ -278,7 +289,10 @@ const logoutUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true,
+                secure: process.env.NODE_ENV === "production", // use secure cookies in production
+                sameSite: "lax", // necessary for cross-site cookies
+                path: "/",
+                maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
     };
 
     return res
@@ -356,6 +370,11 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+    if(!req.user){
+        return res
+            .status(401)
+            .json(new ApiResponse(401,{}, "No user"));
+    }
     return res
         .status(200)
         .json(new ApiResponse(200, req.user, "User fetched successfully"));

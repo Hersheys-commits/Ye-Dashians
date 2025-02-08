@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useForm, useWatch } from "react-hook-form";
 import toast from "react-hot-toast";
+import api from "../utils/axiosRequest";
 
 function Questionnaire() {
     const navigate = useNavigate();
@@ -59,8 +60,8 @@ function Questionnaire() {
     // Form submission handlers for each slide:
     const onSubmitPersonal = async (data) => {
         try {
-            const response = await axios.patch(
-                "https://nexus-xwdr.onrender.com/api/users/update-account-question",
+            const response = await api.patch(
+                "/api/users/update-account-question",
                 data,
                 { withCredentials: true }
             );
@@ -74,8 +75,8 @@ function Questionnaire() {
 
     const onSubmitPlaces = async (data) => {
         try {
-            const response = await axios.post(
-                "https://nexus-xwdr.onrender.com/api/users/update-preferences",
+            const response = await api.post(
+                "/api/users/update-preferences",
                 { preferences: data },
                 { withCredentials: true }
             );
@@ -90,11 +91,9 @@ function Questionnaire() {
 
     const onSubmitBio = async (data) => {
         try {
-            const response = await axios.post(
-                "https://nexus-xwdr.onrender.com/api/users/update-bio",
-                data,
-                { withCredentials: true }
-            );
+            const response = await api.post("/api/users/update-bio", data, {
+                withCredentials: true,
+            });
             console.log(response);
             toast.success("Bio updated successfully");
         } catch (error) {

@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import ProfilePicture from "../components/ProfilePicture";
 import Swal from "sweetalert2";
 import { useForm, useWatch } from "react-hook-form";
+import api from "../utils/axiosRequest";
 
 function CurrentUserProfilePage() {
     const user = useSelector((store) => store.auth.userInfo);
@@ -90,11 +91,9 @@ function CurrentUserProfilePage() {
 
     const onSubmitBio = async (data) => {
         try {
-            const response = await axios.post(
-                "https://nexus-xwdr.onrender.com/api/users/update-bio",
-                data,
-                { withCredentials: true }
-            );
+            const response = await api.post("/api/users/update-bio", data, {
+                withCredentials: true,
+            });
             // Update the local profile state with the new bio
             setProfile((prevProfile) => ({
                 ...prevProfile,
@@ -115,8 +114,8 @@ function CurrentUserProfilePage() {
     const onSubmit = async (data) => {
         try {
             // Patch request to update user data.
-            const response = await axios.patch(
-                "https://nexus-xwdr.onrender.com/api/users/update-account",
+            const response = await api.patch(
+                "/api/users/update-account",
                 data,
                 { withCredentials: true }
             );
@@ -159,8 +158,8 @@ function CurrentUserProfilePage() {
     // Fetch friend or friend request profile picture based on friendId.
     const fetchFriendProfile = async (friendId, type) => {
         try {
-            const response = await axios.get(
-                `https://nexus-xwdr.onrender.com/api/friends/getProfileById/${friendId}`,
+            const response = await api.get(
+                `/api/friends/getProfileById/${friendId}`,
                 { withCredentials: true }
             );
             if (type === "friend") {
@@ -228,10 +227,9 @@ function CurrentUserProfilePage() {
     // Fetch the current user's profile.
     const fetchCurrentUserProfile = async () => {
         try {
-            const response = await axios.get(
-                "https://nexus-xwdr.onrender.com/api/users/profile",
-                { withCredentials: true }
-            );
+            const response = await api.get("/api/users/profile", {
+                withCredentials: true,
+            });
             setProfile(response.data.data);
             // console.log("fetch",response)
             setPreferences(response.data.data.user.preferences);
@@ -263,8 +261,8 @@ function CurrentUserProfilePage() {
         if (!result.isConfirmed) return; // Exit if cancelled
 
         try {
-            await axios.post(
-                `https://nexus-xwdr.onrender.com/api/friends/remove-friend`,
+            await api.post(
+                `/api/friends/remove-friend`,
                 { friendId },
                 { withCredentials: true }
             );
@@ -291,8 +289,8 @@ function CurrentUserProfilePage() {
     // Accept a friend request.
     const acceptFriendRequest = async (requestId) => {
         try {
-            await axios.post(
-                `https://nexus-xwdr.onrender.com/api/friends/accept-request`,
+            await api.post(
+                `/api/friends/accept-request`,
                 { requestId },
                 { withCredentials: true }
             );
@@ -311,8 +309,8 @@ function CurrentUserProfilePage() {
     // Reject a friend request.
     const rejectFriendRequest = async (requestId) => {
         try {
-            await axios.post(
-                `https://nexus-xwdr.onrender.com/api/friends/reject-request`,
+            await api.post(
+                `/api/friends/reject-request`,
                 { requestId },
                 { withCredentials: true }
             );
@@ -347,8 +345,8 @@ function CurrentUserProfilePage() {
     // Handle updating place preferences
     const onSubmitPlaces = async (data) => {
         try {
-            const response = await axios.post(
-                "https://nexus-xwdr.onrender.com/api/users/update-preferences",
+            const response = await api.post(
+                "/api/users/update-preferences",
                 { preferences: data },
                 { withCredentials: true }
             );

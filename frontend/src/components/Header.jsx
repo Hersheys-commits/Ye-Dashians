@@ -1,32 +1,61 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { logout } from "../store/authSlice";
-import Cookies from "js-cookie";
+import api from "../utils/axiosRequest";
+
+// Custom hook to check authentication status using api.
+function useAuthStatus() {
+    const [loading, setLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        async function checkAuth() {
+            try {
+                const response = await api.get(
+                    "/api/users/current-user",
+                    { withCredentials: true } // ensures cookies (even HTTP-only ones) are sent
+                );
+
+                // Assuming a successful response does not include an "error" field.
+                if (response.data && !response.data.error) {
+                    setIsLoggedIn(true);
+                    // Adjust property path if your API wraps user data differently.
+                    setUser(response.data.user || response.data);
+                } else {
+                    setIsLoggedIn(false);
+                    setUser(null);
+                }
+            } catch (error) {
+                setIsLoggedIn(false);
+                setUser(null);
+            }
+            setLoading(false);
+        }
+        checkAuth();
+    }, []);
+
+    return { loading, isLoggedIn, user };
+}
 
 const Header = () => {
     const navigateTo = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
 
-    // Retrieve user info from localStorage.
-    const userInfo = JSON.parse(localStorage.getItem("user"));
-    let isLoggedIn = false;
-    if (userInfo && Cookies.get("accessToken")) isLoggedIn = true;
+    // Use the custom hook to determine the auth status.
+    const { loading, isLoggedIn, user } = useAuthStatus();
 
     const handleLogout = async () => {
         try {
-            await axios.post(
-                "https://nexus-xwdr.onrender.com/api/users/logout",
-                {},
-                { withCredentials: true }
-            );
-
+            const res = await api.get("/api/users/logout", {
+                withCredentials: true,
+            });
+            console.log("api request", res);
             dispatch(logout());
-            localStorage.removeItem("user");
-
             toast.success("Logged out successfully.");
             navigateTo("/login");
         } catch (error) {
@@ -43,7 +72,8 @@ const Header = () => {
         navigateTo("/login");
     };
 
-    if (typeof isLoggedIn === "undefined") {
+    // Render a skeleton header while checking auth status.
+    if (loading) {
         return (
             <header className="navbar bg-base-100 skeleton">
                 <div className="navbar-start">
@@ -90,7 +120,7 @@ const Header = () => {
                             role="button"
                             className="btn btn-ghost"
                         >
-                            {userInfo?.user?.fullName || "User"}
+                            {user?.fullName || "User"}
                             <svg
                                 className="w-4 h-4 ml-2"
                                 fill="none"
@@ -109,7 +139,7 @@ const Header = () => {
                             tabIndex={0}
                             className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
                         >
-                            {/* Only render the Profile link if we are NOT already on the profile page */}
+                            {/* Only render the Home link if not already on it */}
                             {location.pathname !== "/" && (
                                 <li>
                                     <Link to="/">Home</Link>

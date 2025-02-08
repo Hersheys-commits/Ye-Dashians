@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Search, MapPin, User, MessageCircle } from "lucide-react";
 import axios from "axios";
-import Cookies from "js-cookie";
 import { useForm } from "react-hook-form";
 import { login } from "../store/authSlice";
 import Header from "../components/Header";
+import api from "../utils/axiosRequest";
 
 function HomePage() {
     const navigate = useNavigate();
@@ -24,8 +24,6 @@ function HomePage() {
     console.log("stateuser", user);
     const dispatch = useDispatch();
 
-    const accessToken = Cookies.get("accessToken");
-
     const { register, handleSubmit, watch, setValue } = useForm({
         defaultValues: {
             username: "",
@@ -36,12 +34,9 @@ function HomePage() {
 
     const dataSave = async () => {
         try {
-            const response = await axios.get(
-                "https://nexus-xwdr.onrender.com/api/users/profile",
-                {
-                    withCredentials: true,
-                }
-            );
+            const response = await api.get("/api/users/profile", {
+                withCredentials: true,
+            });
 
             dispatch(
                 login({
@@ -64,7 +59,7 @@ function HomePage() {
         if (value.length > 2) {
             setIsLoading(true);
             try {
-                const response = await axios.get(
+                const response = await api.get(
                     `/api/users/search?query=${value}`,
                     {
                         withCredentials: true,
@@ -97,8 +92,8 @@ function HomePage() {
             setIsPlaceLoading(true);
             try {
                 // Adjust the endpoint as needed. This is an example URL.
-                const response = await axios.get(
-                    `https://nexus-xwdr.onrender.com/api/places/autocomplete?query=${value}`,
+                const response = await api.get(
+                    `/api/places/autocomplete?query=${value}`,
                     { withCredentials: true }
                 );
                 setPlaceSuggestions(response.data.data || []);

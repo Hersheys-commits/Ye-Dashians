@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import defaultProfile from "../assets/Profile_user.png";
 import { useEffect } from "react";
+import api from "../utils/axiosRequest";
 
 function ProfilePicture() {
     const authUser = JSON.parse(localStorage.getItem("user"));
@@ -30,17 +31,13 @@ function ProfilePicture() {
             const formData = new FormData();
             formData.append("avatar", file);
 
-            const response = await axios.patch(
-                "https://nexus-xwdr.onrender.com/api/users/avatar",
-                formData,
-                {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                        // "Authorization": `Bearer ${authUser.accessToken}` // Add token
-                    },
-                }
-            );
+            const response = await api.patch("/api/users/avatar", formData, {
+                withCredentials: true,
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    // "Authorization": `Bearer ${authUser.accessToken}` // Add token
+                },
+            });
 
             if (response.data?.data?.avatar) {
                 // Update local storage with new user data
@@ -69,15 +66,12 @@ function ProfilePicture() {
     const handleRemoveImage = async () => {
         try {
             setIsUpdatingProfile(true);
-            const response = await axios.delete(
-                "https://nexus-xwdr.onrender.com/api/users/avatar/remove",
-                {
-                    withCredentials: true,
-                    headers: {
-                        Authorization: `Bearer ${authUser.accessToken}`,
-                    },
-                }
-            );
+            const response = await api.delete("/api/users/avatar/remove", {
+                withCredentials: true,
+                headers: {
+                    Authorization: `Bearer ${authUser.accessToken}`,
+                },
+            });
 
             if (response.data?.data) {
                 // Update local storage

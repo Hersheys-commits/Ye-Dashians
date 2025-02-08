@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessages } from "../store/chatSlice";
+import api from "../utils/axiosRequest";
 
 function useGetMessage() {
     const [messageLoading, setMessageLoading] = useState(false);
@@ -13,8 +14,8 @@ function useGetMessage() {
             setMessageLoading(true);
             if (selectedFriend?._id) {
                 try {
-                    const res = await axios.get(
-                        `https://nexus-xwdr.onrender.com/api/message/getMessage/${selectedFriend._id}`,
+                    const res = await api.get(
+                        `/api/message/getMessage/${selectedFriend._id}`,
                         {
                             withCredentials: true,
                         }

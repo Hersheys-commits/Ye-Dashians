@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import useGoogleAuth from "../utils/authUtil";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import api from "../utils/axiosRequest";
 
 const SignupPage = () => {
     const { handleGoogleSuccess, handleGoogleFailure } = useGoogleAuth();
@@ -19,8 +20,8 @@ const SignupPage = () => {
     const onSubmit = async (data) => {
         const { fullName, username, email, password } = data;
         try {
-            const response = await axios.post(
-                "https://nexus-xwdr.onrender.com/api/users/register",
+            const response = await api.post(
+                "/api/users/register",
                 { fullName, username, email, password },
                 {
                     withCredentials: true,

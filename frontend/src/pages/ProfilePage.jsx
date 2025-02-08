@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Header from "../components/Header";
-import { BsChatHeartFill } from "react-icons/bs";
+import api from "../utils/axiosRequest";
 import { MdOutlineChat } from "react-icons/md";
 
 function UserProfilePage() {
@@ -21,8 +21,8 @@ function UserProfilePage() {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const response = await axios.get(
-                    `https://nexus-xwdr.onrender.com/api/friends/profile/${username}`,
+                const response = await api.get(
+                    `/api/friends/profile/${username}`,
                     {
                         withCredentials: true,
                         timeout: 5000,
@@ -52,8 +52,8 @@ function UserProfilePage() {
     const sendFriendRequest = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post(
-                `https://nexus-xwdr.onrender.com/api/friends/friend-request/${username}`,
+            const response = await api.post(
+                `/api/friends/friend-request/${username}`,
                 {},
                 {
                     withCredentials: true,
@@ -78,8 +78,8 @@ function UserProfilePage() {
     const cancelFriendRequest = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.delete(
-                `https://nexus-xwdr.onrender.com/api/friends/cancel-request/${username}`,
+            const response = await api.delete(
+                `/api/friends/cancel-request/${username}`,
                 {
                     withCredentials: true,
                 }

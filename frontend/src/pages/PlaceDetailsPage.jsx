@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import Header from "../components/Header";
 import { useSocket } from "../hooks/socketHook";
 import useGetAllFriends from "../hooks/useGetAllFriends";
+import api from "../utils/axiosRequest";
 
 const PlaceDetailsPage = () => {
     const [placeDetails, setPlaceDetails] = useState(null);
@@ -25,12 +26,9 @@ const PlaceDetailsPage = () => {
         const fetchPlaceDetails = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(
-                    `https://nexus-xwdr.onrender.com/api/place/${place_id}`,
-                    {
-                        withCredentials: true,
-                    }
-                );
+                const response = await api.get(`/api/place/${place_id}`, {
+                    withCredentials: true,
+                });
                 console.log(response);
                 setPlaceDetails(response.data.result);
             } catch (err) {

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { login } from "../store/authSlice";
 import axios from "axios";
 import toast from "react-hot-toast";
+import api from "./axiosRequest";
 
 const useGoogleAuth = () => {
     const dispatch = useDispatch();
@@ -10,8 +11,8 @@ const useGoogleAuth = () => {
 
     const handleGoogleSignIn = async (tokenId) => {
         try {
-            const res = await axios.post(
-                "https://nexus-xwdr.onrender.com/api/users/google-login",
+            const res = await api.post(
+                "/api/users/google-login",
                 { tokenId },
                 { withCredentials: true }
             );

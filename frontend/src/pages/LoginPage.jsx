@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { login } from "../store/authSlice";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import useGoogleAuth from "../utils/authUtil";
+import api from "../utils/axiosRequest";
 
 const LoginPage = () => {
     const { handleGoogleSuccess, handleGoogleFailure } = useGoogleAuth();
@@ -23,8 +24,8 @@ const LoginPage = () => {
     const onSubmit = async (data) => {
         const { email, password } = data;
         try {
-            const response = await axios.post(
-                "https://nexus-xwdr.onrender.com/api/users/login",
+            const response = await api.post(
+                "/api/users/login",
                 { email, password },
                 {
                     withCredentials: true,

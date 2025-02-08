@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessages } from "../store/chatSlice";
 import axios from "axios";
+import api from "../utils/axiosRequest";
 
 function useSendMessage() {
     const [sendMessageLoading, setSendMessageLoading] = useState(false);
@@ -23,8 +24,8 @@ function useSendMessage() {
                 formData.append("isTemplate", messageData.isTemplate);
             }
             console.log("selectedFriend", selectedFriend);
-            const res = await axios.post(
-                `https://nexus-xwdr.onrender.com/api/message/sendMessage/${selectedFriend._id}`,
+            const res = await api.post(
+                `/api/message/sendMessage/${selectedFriend._id}`,
                 formData,
                 {
                     withCredentials: true,
