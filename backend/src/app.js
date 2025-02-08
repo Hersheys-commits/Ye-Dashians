@@ -11,7 +11,7 @@ dotenv.config({
 
 app.use(
     cors({
-        origin: ["http://localhost:5173","https://nexus-tau-seven.vercel.app"], // Allow requests from your frontend
+        origin: "https://nexus-tau-seven.vercel.app", // Allow requests from your frontend
         credentials: true, // Allow cookies
     })
 );
