@@ -10,7 +10,7 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
             req.cookies?.accessToken ||
             req.header("Authorization")?.replace("Bearer ", "");
         if (!token) {
-            throw new ApiError(401, "Unauthorized request");
+            throw new ApiError(402, "Unauthorized request");
             // req.user=null;
             // next();
         }
@@ -22,13 +22,13 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
         );
 
         if (!user) {
-            throw new ApiError(401, "Invalid Access Token");
+            throw new ApiError(403, "Invalid Access Token");
         }
 
         req.user = user;
         // console.log("success jwt verify")
         next();
     } catch (error) {
-        throw new ApiError(401, error?.message || "Invalid access token");
+        throw new ApiError(404, error?.message || "Invalid access token");
     }
 });
