@@ -1,4 +1,4 @@
-// socketHook.js
+// client/hooks/useSocket.js
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -16,10 +16,12 @@ export const useSocket = () => {
     useEffect(() => {
         const authUser = JSON.parse(localStorage.getItem("user"));
 
-        if (authUser && !getSocket()) {
+        if (authUser?.user?._id && !getSocket()) {
+            console.log("Initializing socket for user:", authUser.user._id);
             dispatch(initializeSocket(authUser.user._id));
 
             return () => {
+                console.log("Cleaning up socket connection");
                 dispatch(closeSocket());
             };
         }

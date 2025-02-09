@@ -1,3 +1,4 @@
+// client/store/socketMiddleware.js
 import io from "socket.io-client";
 import {
     setConnectionStatus,
@@ -5,18 +6,28 @@ import {
     clearSocketState,
 } from "./socketSlice";
 import { addMessage } from "./chatSlice";
-import { updateFriendLastMessage } from "./friendSlice"; // adjust the path as needed
 
-let socket = null; // Keep socket instance outside of Redux
+let socket = null;
 
-export const initializeSocket = (userId) => (dispatch, getState) => {
-    if (socket) return; // Prevent multiple socket connections
+export const initializeSocket = (userId) => (dispatch) => {
+    if (socket?.connected) {
+        console.log("Socket already connected");
+        return;
+    }
 
-    socket = io("", {
-        query: { userId: userId },
+    const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4001";
+    
+    console.log("Initializing socket connection to:", SOCKET_URL);
+    
+    socket = io(SOCKET_URL, {
+        query: { userId },
+        transports: ['websocket', 'polling'],
+        withCredentials: true,
+        timeout: 10000,
     });
 
-    socket.on("connection", () => {
+    socket.on("connect", () => {
+        console.log("Socket connected:", socket.id);
         dispatch(
             setConnectionStatus({
                 connected: true,
@@ -25,35 +36,8 @@ export const initializeSocket = (userId) => (dispatch, getState) => {
         );
     });
 
-    socket.on("getOnlineUsers", (users) => {
-        dispatch(setOnlineUsers(users));
-    });
-
-    socket.on("newMessage", (newMessage) => {
-        // Get the currently selected friend from state
-        const { selectedFriend } = getState().chat;
-
-        /*  
-          Check if the newMessage belongs to the currently active chat.
-          For example, if the logged in user (user2) has selected a friend (user3)
-          then only dispatch messages that involve user3.
-          We assume newMessage has senderId and receiverId fields.
-        */
-        if (
-            selectedFriend &&
-            (selectedFriend._id === newMessage.senderId ||
-                selectedFriend._id === newMessage.receiverId)
-        ) {
-            dispatch(addMessage(newMessage));
-        }
-
-        //Here create a new code so that it appends changes in redux when it gets newMessage
-
-        // Notify the sender that the message was received (or perform other actions)
-        socket.emit("messageReceived", { messageId: newMessage._id });
-    });
-
-    socket.on("disconnect", () => {
+    socket.on("connect_error", (error) => {
+        console.error("Socket connection error:", error);
         dispatch(
             setConnectionStatus({
                 connected: false,
@@ -62,16 +46,41 @@ export const initializeSocket = (userId) => (dispatch, getState) => {
         );
     });
 
-    return socket; // Return for cleanup purposes
+    socket.on("getOnlineUsers", (users) => {
+        console.log("Online users updated:", users);
+        dispatch(setOnlineUsers(users));
+    });
+
+    socket.on("newMessage", (newMessage) => {
+        console.log("New message received:", newMessage);
+        dispatch(addMessage(newMessage));
+    });
+
+    socket.on("disconnect", (reason) => {
+        console.log("Socket disconnected:", reason);
+        dispatch(
+            setConnectionStatus({
+                connected: false,
+                socketId: null,
+            })
+        );
+    });
+
+    // Add error handling
+    socket.on("error", (error) => {
+        console.error("Socket error:", error);
+    });
+
+    return socket;
 };
 
 export const closeSocket = () => (dispatch) => {
-    if (socket) {
+    if (socket?.connected) {
+        console.log("Closing socket connection");
         socket.close();
         socket = null;
         dispatch(clearSocketState());
     }
 };
 
-// Export for components that need to access socket
 export const getSocket = () => socket;

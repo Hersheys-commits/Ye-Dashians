@@ -16,6 +16,7 @@ import Questionnaire from "./pages/Questionnaire";
 import PlaceDetailsPage from "./pages/PlaceDetailsPage";
 import SettingsPage from "./pages/SettingsPage";
 import api from "./utils/axiosRequest";
+import Loading from "./components/Loading";
 
 // Custom hook to check authentication status using axios
 function useCheckAuth() {
@@ -56,7 +57,7 @@ function ProtectedRoute({ children }) {
     const { loading, authenticated } = useCheckAuth();
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className="flex justify-center items-center"><Loading/></div>;
     }
 
     if (!authenticated) {

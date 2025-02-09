@@ -19,12 +19,12 @@ function useAuthStatus() {
                     "/api/users/current-user",
                     { withCredentials: true } // ensures cookies (even HTTP-only ones) are sent
                 );
-
+                // console.log(response)
                 // Assuming a successful response does not include an "error" field.
-                if (response.data && !response.data.error) {
+                if (response?.data?.data && !response?.data?.error) {
                     setIsLoggedIn(true);
                     // Adjust property path if your API wraps user data differently.
-                    setUser(response.data.user || response.data);
+                    setUser(response.data.data);
                 } else {
                     setIsLoggedIn(false);
                     setUser(null);

@@ -1,3 +1,4 @@
+// server/socket.js
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
@@ -8,39 +9,47 @@ dotenv.config({
 });
 
 const app = express();
-
 const server = http.createServer(app);
+
 const io = new Server(server, {
     cors: {
         origin: "https://nexus-tau-seven.vercel.app",
         methods: ["GET", "POST"],
+        credentials: true
     },
+    pingTimeout: 60000,
+    transports: ['websocket', 'polling']
 });
-
-// realtime message code goes here
-export const getReceiverSocketId = (receiverId) => {
-    return users[receiverId];
-};
 
 const users = {};
 
-// used to listen events on server side.
 io.on("connection", (socket) => {
-    console.log("a user connected", socket.id);
+    console.log("🟢 New socket connection:", socket.id);
+    
     const userId = socket.handshake.query.userId;
     if (userId) {
         users[userId] = socket.id;
-        console.log("Hello ", users);
+        console.log("User connected:", { userId, socketId: socket.id });
+        console.log("Online users:", Object.keys(users));
     }
-    // used to send the events to all connected users
+
     io.emit("getOnlineUsers", Object.keys(users));
 
-    // used to listen client side events emitted by server side (server & client)
     socket.on("disconnect", () => {
-        console.log("a user disconnected", socket.id);
-        delete users[userId];
-        io.emit("getOnlineUsers", Object.keys(users));
+        console.log("🔴 User disconnected:", socket.id);
+        if (userId) {
+            delete users[userId];
+            console.log("Remaining users:", Object.keys(users));
+            io.emit("getOnlineUsers", Object.keys(users));
+        }
+    });
+
+    // Add error handling
+    socket.on("error", (error) => {
+        console.error("Socket error:", error);
     });
 });
+
+export const getReceiverSocketId = (receiverId) => users[receiverId];
 
 export { app, io, server };
