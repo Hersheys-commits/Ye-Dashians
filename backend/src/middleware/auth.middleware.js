@@ -4,15 +4,16 @@ import { ApiResponse } from "../util/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import User from "../model/user.model.js";
 
-export const verifyJWT = asyncHandler(async (req, _, next) => {
+export const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
         const token =
             req.cookies?.accessToken ||
             req.header("Authorization")?.replace("Bearer ", "");
         if (!token) {
-            throw new ApiError(401, "Unauthorized request");
-            // req.user=null;
-            // next();
+            // console.log("first")
+            return res
+            .status(401)
+            .json(new ApiResponse(401, null, "Unauthorized request - No token provided"));
         }
 
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);

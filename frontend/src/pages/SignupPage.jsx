@@ -166,6 +166,11 @@ const SignupPage = () => {
                                 <GoogleLogin
                                     onSuccess={handleGoogleSuccess}
                                     onError={handleGoogleFailure}
+                                    // Provide explicit configuration values:
+                                    text="signin_with" // or "continue_with"
+                                    shape="pill" // can be "rectangular", "pill", etc.
+                                    logo_alignment="left" // "left" or "center"
+                                    locale="en" // specify a locale, e.g., "en" for English
                                     render={(renderProps) => (
                                         <button
                                             onClick={renderProps.onClick}
@@ -181,7 +186,7 @@ const SignupPage = () => {
                                             >
                                                 <g>
                                                     <path
-                                                        d="m0 0H512V512H0"
+                                                        d="M0 0H512V512H0"
                                                         fill="#fff"
                                                     ></path>
                                                     <path
@@ -190,15 +195,15 @@ const SignupPage = () => {
                                                     ></path>
                                                     <path
                                                         fill="#4285f4"
-                                                        d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
+                                                        d="M386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
                                                     ></path>
                                                     <path
                                                         fill="#fbbc02"
-                                                        d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
+                                                        d="M90 341a208 200 0 010-171l63 49q-12 37 0 73"
                                                     ></path>
                                                     <path
                                                         fill="#ea4335"
-                                                        d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
+                                                        d="M153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
                                                     ></path>
                                                 </g>
                                             </svg>

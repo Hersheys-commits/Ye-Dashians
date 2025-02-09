@@ -25,11 +25,13 @@ function useCheckAuth() {
     useEffect(() => {
         async function checkAuth() {
             try {
+                // console.log("first")
                 const response = await api.get("/api/users/current-user", {
                     withCredentials: true, // ensure cookies are sent with the request
                 });
 
                 // If there's no error in the response data, consider the user authenticated.
+                // console.log("response", response);
                 if (response.data && !response.data.error) {
                     setAuthenticated(true);
                 } else {
@@ -37,6 +39,7 @@ function useCheckAuth() {
                 }
             } catch (error) {
                 // In case of any error, assume the user is not authenticated.
+                // console.log("errorin",error);
                 setAuthenticated(false);
             }
             setLoading(false);

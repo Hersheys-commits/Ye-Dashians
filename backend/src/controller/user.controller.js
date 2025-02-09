@@ -279,7 +279,6 @@ const logoutUser = asyncHandler(async (req, res) => {
         {
             $unset: {
                 refreshToken: 1,
-                // accessToken:1 // this removes the field from document
             },
         },
         {
@@ -289,10 +288,9 @@ const logoutUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // use secure cookies in production
-        sameSite: "lax", // necessary for cross-site cookies
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
         path: "/",
-        maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
     };
 
     return res
