@@ -97,51 +97,51 @@ const PlaceDetailsPage = () => {
 
     const getPlaceHtmlString = (place) => {
         return `
-      <div class="flex flex-row p-4 bg-white rounded-lg shadow-lg">
-        <!-- Image Section -->
-        <div class="flex-none mr-4 space-y-2">
-          <img 
-            src="${getPhotoUrl(place, 0)}" 
-            alt="${place.name}" 
-            class="w-[150px] h-[150px] object-cover rounded-lg" 
-          />
-          <img 
-            src="${getPhotoUrl(place, 2)}" 
-            alt="${place.name}" 
-            class="w-[150px] h-[150px] object-cover rounded-lg" 
-          />
-          <img 
-            src="${getPhotoUrl(place, 1)}" 
-            alt="${place.name}" 
-            class="w-[150px] h-[150px] object-cover rounded-lg" 
-          />
-        </div>
-        <!-- Details Section -->
-        <div class="flex-1">
-          <h2 class="text-xl mb-2 text-indigo-500 font-semibold">
-            <a href="#" onclick="handleVenueClick('${venue.reference}')" class="hover:underline">
-                ${place.name}
-            </a>
-          </h2>
-          ${place.vicinity ? `<p class="block mt-1 text-lg leading-tight font-medium text-black"> ${place.vicinity}</p>` : ""}
-          ${place.formatted_phone_number ? `<p class="text-gray-700 mt-2"><strong>Phone:</strong> ${place.formatted_phone_number}</p>` : ""}
-          ${place.website ? `<p class="mt-2"><strong>Website:</strong> <a href="${place.website}" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">Visit Website</a></p>` : ""}
-          ${place.rating ? `<p class="mt-2 text-gray-700"><strong>Rating:</strong> ${place.rating} (${place.user_ratings_total} reviews)</p>` : ""}
-          ${place.current_opening_hours ? `<p class="mt-2 text-gray-700"><strong>Status:</strong> ${place.current_opening_hours.open_now ? "Open Now" : "Closed"}</p>` : ""}
-          ${
-              place.opening_hours && place.opening_hours.weekday_text
-                  ? `
-            <div class="mt-2 text-gray-700">
-              <strong>Opening Hours:</strong>
-              <ul class="list-disc pl-5">
-                ${place.opening_hours.weekday_text.map((day) => `<li>${day}</li>`).join("")}
-              </ul>
-            </div>`
-                  : ""
-          }
-        </div>
-      </div>
-    `;
+          <div class="flex flex-row p-4 bg-white rounded-lg shadow-lg">
+            <!-- Image Section -->
+            <div class="flex-none mr-4 space-y-2">
+              <img 
+                src="${getPhotoUrl(place, 0)}" 
+                alt="${place.name}" 
+                class="w-[150px] h-[150px] object-cover rounded-lg" 
+              />
+              <img 
+                src="${getPhotoUrl(place, 2)}" 
+                alt="${place.name}" 
+                class="w-[150px] h-[150px] object-cover rounded-lg" 
+              />
+              <img 
+                src="${getPhotoUrl(place, 1)}" 
+                alt="${place.name}" 
+                class="w-[150px] h-[150px] object-cover rounded-lg" 
+              />
+            </div>
+            <!-- Details Section -->
+            <div class="flex-1">
+              <h2 class="text-xl mb-2 text-indigo-500 font-semibold">
+                <a href="#" data-place-id="${place.place_id}" class="place-link hover:underline">
+                    ${place.name}
+                </a>
+              </h2>
+              ${place.vicinity ? `<p class="block mt-1 text-lg leading-tight font-medium text-black"> ${place.vicinity}</p>` : ""}
+              ${place.formatted_phone_number ? `<p class="text-gray-700 mt-2"><strong>Phone:</strong> ${place.formatted_phone_number}</p>` : ""}
+              ${place.website ? `<p class="mt-2"><strong>Website:</strong> <a href="${place.website}" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">Visit Website</a></p>` : ""}
+              ${place.rating ? `<p class="mt-2 text-gray-700"><strong>Rating:</strong> ${place.rating} (${place.user_ratings_total} reviews)</p>` : ""}
+              ${place.current_opening_hours ? `<p class="mt-2 text-gray-700"><strong>Status:</strong> ${place.current_opening_hours.open_now ? "Open Now" : "Closed"}</p>` : ""}
+              ${
+                  place.opening_hours && place.opening_hours.weekday_text
+                      ? `
+                <div class="mt-2 text-gray-700">
+                  <strong>Opening Hours:</strong>
+                  <ul class="list-disc pl-5">
+                    ${place.opening_hours.weekday_text.map((day) => `<li>${day}</li>`).join("")}
+                  </ul>
+                </div>`
+                      : ""
+              }
+            </div>
+          </div>
+        `;
     };
 
     const handleShare = async () => {
