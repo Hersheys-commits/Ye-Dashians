@@ -119,7 +119,7 @@ const PlaceDetailsPage = () => {
         <!-- Details Section -->
         <div class="flex-1">
           <h2 class="text-xl mb-2 text-indigo-500 font-semibold">
-            <a href="/place/${place.reference}" class="hover:underline">
+            <a href="#" onclick="handleVenueClick('${venue.reference}')" class="hover:underline">
                 ${place.name}
             </a>
           </h2>

@@ -2,13 +2,21 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { formatMessageTime } from "../../../utils/time";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 function Message({ message }) {
     const selectedFriend = useSelector((store) => store.chat.selectedFriend);
     // Assume the current user is the sender if message.senderId does NOT match the selected friend's id.
     const userIsSender = message.senderId !== selectedFriend._id;
     const time = formatMessageTime(message.createdAt);
-    const navigateTo = useNavigate();
+    const navigate = useNavigate();
+
+    // Attach the handler to the window so it’s accessible from the HTML string.
+    useEffect(() => {
+        window.handleVenueClick = (venueReference) => {
+            navigate(`/place/${venueReference}`);
+        };
+    }, [navigate]);
 
     // Render the message content (supports text and image)
     // If both image and text exist, image is rendered above the text.

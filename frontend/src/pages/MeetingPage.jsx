@@ -122,7 +122,7 @@ function MeetingPage() {
             <div class="md:flex">
               <div class="p-6">
                 <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-                    <a href="/place/${venue.reference}" class="hover:underline">
+                    <a href="#" onclick="handleVenueClick('${venue.reference}')" class="hover:underline">
                         ${venue.name}
                     </a>
                 </div>
