@@ -289,10 +289,10 @@ const logoutUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-                secure: process.env.NODE_ENV === "production", // use secure cookies in production
-                sameSite: "lax", // necessary for cross-site cookies
-                path: "/",
-                maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
+        secure: process.env.NODE_ENV === "production", // use secure cookies in production
+        sameSite: "lax", // necessary for cross-site cookies
+        path: "/",
+        maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
     };
 
     return res
@@ -370,11 +370,6 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    if(!req.user){
-        return res
-            .status(401)
-            .json(new ApiResponse(401,{}, "No user"));
-    }
     return res
         .status(200)
         .json(new ApiResponse(200, req.user, "User fetched successfully"));

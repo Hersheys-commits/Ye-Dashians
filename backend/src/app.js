@@ -12,7 +12,7 @@ dotenv.config({
 const allowedOrigins = [
     "https://nexus-tau-seven.vercel.app",
     "http://localhost:5173", // if needed for local development
-  ];
+];
 
 app.use(
     cors({
@@ -58,7 +58,7 @@ app.get("/api/nearbyplaces", async (req, res) => {
 app.get("/api/place/:placeId", async (req, res) => {
     // Expect query parameters: location, radius, type
     // const { location, radius, type } = req.query;
-        const { placeId } = req.params;
+    const { placeId } = req.params;
     const apiKey = process.env.GOOGLE_MAP_API;
 
     // Construct the URL for the Google Places Nearby Search endpoint

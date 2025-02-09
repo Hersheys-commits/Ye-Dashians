@@ -14,7 +14,10 @@ export const getUsersForSidebar = async (req, res) => {
 
         // Find the logged in user and populate the friends' user details.
         const user = await User.findById(loggedInUserId)
-            .populate("friends.userId", "fullName email _id avatar username address preferences")
+            .populate(
+                "friends.userId",
+                "fullName email _id avatar username address preferences"
+            )
             .select("friends");
 
         if (!user) {
