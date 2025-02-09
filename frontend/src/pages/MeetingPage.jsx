@@ -118,32 +118,32 @@ function MeetingPage() {
 
     const getVenueHtmlString = (venue, selectedFriend, getPhotoUrl) => {
         return `
-            <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
-                <div class="md:flex">
-                    <div class="p-6">
-                        <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-                            <a href="#" data-place-id="${venue.reference}" class="place-link hover:underline">
-                                ${venue.name}
-                            </a>
-                        </div>
-                        <p class="block mt-1 text-lg leading-tight font-medium text-black">${venue.vicinity}</p>
-                        <p class="mt-2 text-gray-500">Rating: ${venue.rating}</p>
-                        ${
-                            venue.distanceInfo && venue.distanceInfo.user1
-                                ? `<p class="mt-2 text-gray-600 text-xs">From Location 1: ${venue.distanceInfo.user1.distance} (${venue.distanceInfo.user1.duration})</p>`
-                                : ""
-                        }
-                        ${
-                            venue.distanceInfo && venue.distanceInfo.user2
-                                ? `<p class="mt-2 text-gray-600 text-xs">From Location 2: ${venue.distanceInfo.user2.distance} (${venue.distanceInfo.user2.duration})</p>`
-                                : ""
-                        }
-                    </div>
-                    <div class="md:flex-shrink-0">
-                        <img class="h-48 w-full object-cover md:w-48" src="${getPhotoUrl(venue)}" alt="${venue.name}" />
-                    </div>
+          <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+            <div class="md:flex">
+              <div class="p-6">
+                <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
+                    <a href="/place/${venue.reference}" class="hover:underline">
+                        ${venue.name}
+                    </a>
                 </div>
+                <p class="block mt-1 text-lg leading-tight font-medium text-black">${venue.vicinity}</p>
+                <p class="mt-2 text-gray-500">Rating: ${venue.rating}</p>
+                ${
+                    venue.distanceInfo && venue.distanceInfo.user1
+                        ? `<p class="mt-2 text-gray-600 text-xs">From Location 1: ${venue.distanceInfo.user1.distance} (${venue.distanceInfo.user1.duration})</p>`
+                        : ""
+                }
+                ${
+                    venue.distanceInfo && venue.distanceInfo.user2
+                        ? `<p class="mt-2 text-gray-600 text-xs">From Location 2: ${venue.distanceInfo.user2.distance} (${venue.distanceInfo.user2.duration})</p>`
+                        : ""
+                }
+              </div>
+              <div class="md:flex-shrink-0">
+                <img class="h-48 w-full object-cover md:w-48" src="${getPhotoUrl(venue)}" alt="${venue.name}" />
+              </div>
             </div>
+          </div>
         `;
     };
 

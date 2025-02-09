@@ -1,32 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { formatMessageTime } from "../../../utils/time";
 import { useNavigate } from "react-router-dom";
 
 function Message({ message }) {
     const selectedFriend = useSelector((store) => store.chat.selectedFriend);
+    // Assume the current user is the sender if message.senderId does NOT match the selected friend's id.
     const userIsSender = message.senderId !== selectedFriend._id;
     const time = formatMessageTime(message.createdAt);
-    const navigate = useNavigate();
-    const messageRef = useRef(null);
+    const navigateTo = useNavigate();
 
-    useEffect(() => {
-        if (message.isTemplate && messageRef.current) {
-            // Add click handlers to all place links in the message
-            const placeLinks =
-                messageRef.current.querySelectorAll(".place-link");
-            placeLinks.forEach((link) => {
-                link.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    const placeId = e.target.dataset.placeId;
-                    if (placeId) {
-                        navigate(`/place/${placeId}`);
-                    }
-                });
-            });
-        }
-    }, [message.isTemplate, navigate]);
-
+    // Render the message content (supports text and image)
+    // If both image and text exist, image is rendered above the text.
     const renderContent = () => {
         return (
             <>
@@ -38,15 +23,17 @@ function Message({ message }) {
                     />
                 )}
                 {message.text && (
-                    <div
-                        ref={messageRef}
-                        className="text-sm"
-                        dangerouslySetInnerHTML={{
-                            __html: message.isTemplate
-                                ? message.text
-                                : message.text,
-                        }}
-                    />
+                    <p className="text-sm">
+                        {message.isTemplate ? (
+                            <span
+                                dangerouslySetInnerHTML={{
+                                    __html: message.text,
+                                }}
+                            />
+                        ) : (
+                            message.text
+                        )}
+                    </p>
                 )}
             </>
         );
@@ -54,23 +41,22 @@ function Message({ message }) {
 
     return (
         <div className="px-3 pt-3">
+            {/* Message Bubble */}
             <div
                 className={`flex ${userIsSender ? "justify-end" : "justify-start"}`}
             >
                 <div
-                    className={`max-w-[80%] rounded-xl p-3 shadow-sm ${
-                        userIsSender
-                            ? "bg-primary text-primary-content"
-                            : "bg-base-200 text-base-content"
-                    }`}
+                    className={`
+            max-w-[80%] rounded-xl p-3 shadow-sm
+            ${userIsSender ? "bg-primary text-primary-content" : "bg-base-200 text-base-content"}
+          `}
                 >
                     {renderContent()}
                     <p
-                        className={`text-[10px] mt-1.5 ${
-                            userIsSender
-                                ? "text-primary-content/70"
-                                : "text-base-content/70"
-                        }`}
+                        className={`
+              text-[10px] mt-1.5
+              ${userIsSender ? "text-primary-content/70" : "text-base-content/70"}
+            `}
                     >
                         {time}
                     </p>
