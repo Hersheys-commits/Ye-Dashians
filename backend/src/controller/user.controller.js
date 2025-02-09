@@ -152,7 +152,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // use secure cookies in production
-        sameSite: "lax", // necessary for cross-site cookies
+        sameSite: "none", // necessary for cross-site cookies
         path: "/",
         maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
     };
@@ -208,7 +208,7 @@ const googleAuth = async (req, res) => {
             const options = {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production", // use secure cookies in production
-                sameSite: "lax", // necessary for cross-site cookies
+                sameSite: "none", // necessary for cross-site cookies
                 path: "/",
                 maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
             };
@@ -246,7 +246,7 @@ const googleAuth = async (req, res) => {
             const options = {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production", // use secure cookies in production
-                sameSite: "lax", // necessary for cross-site cookies
+                sameSite: "none", // necessary for cross-site cookies
                 path: "/",
                 maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
             };
@@ -289,7 +289,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "none",
         path: "/",
     };
 
