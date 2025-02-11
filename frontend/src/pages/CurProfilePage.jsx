@@ -12,6 +12,7 @@ import ProfilePicture from "../components/ProfilePicture";
 import Swal from "sweetalert2";
 import { useForm, useWatch } from "react-hook-form";
 import api from "../utils/axiosRequest";
+import defaultImage from "../assets/Profile_user.png";
 
 function CurrentUserProfilePage() {
     const user = useSelector((store) => store.auth.userInfo);
@@ -714,21 +715,24 @@ function CurrentUserProfilePage() {
                                             className="flex flex-col md:flex-row justify-between items-center bg-base-200 p-3 rounded-lg gap-3 md:gap-0"
                                         >
                                             <div className="flex items-center gap-3">
-                                                <img
-                                                    src={
-                                                        friendProfiles[
-                                                            friend?.userId
-                                                        ] ||
-                                                        "/src/assets/Profile_user.png"
-                                                    }
-                                                    alt={friend?.username}
-                                                    className="w-12 h-12 rounded-full object-cover bg-white cursor-pointer"
-                                                    onClick={() => {
-                                                        navigate(
-                                                            `/profile/${friend?.username}`
-                                                        );
-                                                    }}
-                                                />
+                                            <img
+                                                src={
+                                                    friendProfiles[
+                                                        friend?.userId
+                                                    ] || defaultImage
+                                                }
+                                                alt={friend?.username}
+                                                className="w-12 h-12 rounded-full object-cover bg-white cursor-pointer"
+                                                onClick={() => {
+                                                    navigate(
+                                                        `/profile/${friend?.username}`
+                                                    );
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.src = defaultImage;  // Fallback to default image on error
+                                                    e.target.onerror = null;     // Prevent infinite loop if default image also fails
+                                                }}
+                                            />
                                                 <span
                                                     className="font-medium cursor-pointer"
                                                     onClick={() => {
@@ -788,7 +792,7 @@ function CurrentUserProfilePage() {
                                                                     ?.requester
                                                                     ?.userId
                                                             ] ||
-                                                            "/src/assets/Profile_user.png"
+                                                            defaultImage
                                                         }
                                                         alt={
                                                             request?.requester
@@ -799,6 +803,10 @@ function CurrentUserProfilePage() {
                                                             navigate(
                                                                 `/profile/${request?.requester?.username}`
                                                             );
+                                                        }}
+                                                        onError={(e) => {
+                                                            e.target.src = defaultImage;  // Fallback to default image on error
+                                                            e.target.onerror = null;     // Prevent infinite loop if default image also fails
                                                         }}
                                                     />
                                                     <span

@@ -147,17 +147,18 @@ function MeetingPage() {
         }
     }, [addressCoordinates1, addressCoordinates2]);
 
-    // Custom InfoWindow component
+    // Update the MarkerHoverInfo component
     const MarkerHoverInfo = ({ venue, position }) => {
         if (!venue || !position) return null;
 
         return (
             <div
-                className="absolute z-50 bg-white rounded-lg shadow-lg p-3 w-64"
+                className="fixed z-[999] bg-white rounded-lg shadow-lg p-3 w-64"
                 style={{
                     left: `${position.x}px`,
                     top: `${position.y}px`,
-                    transform: "translate(-50%, -130%)",
+                    transform: "translate(-50%, -120%)",
+                    pointerEvents: "none",
                 }}
             >
                 <div className="flex flex-col">
@@ -191,28 +192,29 @@ function MeetingPage() {
         );
     };
 
-    // Handle marker mouse events
+    // Update the handleMarkerMouseOver function
     const handleMarkerMouseOver = (venue, marker) => {
         // Get the map container element
         const mapContainer = document.querySelector('[aria-label="Map"]');
         if (!mapContainer) return;
 
         // Get the marker's DOM element
-        const markerElement = mapContainer.querySelector(
-            `img[src="${marker.icon.url}"]`
-        );
+        const markerElement = Array.from(
+            mapContainer.querySelectorAll("img")
+        ).find((img) => img.src.includes("blue-dot"));
         if (!markerElement) return;
 
         // Get the marker's position relative to the viewport
         const rect = markerElement.getBoundingClientRect();
 
-        // Get the map container's position
-        const mapRect = mapContainer.getBoundingClientRect();
+        // Account for mobile viewport scroll
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
 
-        // Calculate position relative to the map container
+        // Calculate position relative to the document
         const pos = {
-            x: rect.left - mapRect.left + rect.width / 2,
-            y: rect.top - mapRect.top,
+            x: rect.left + scrollX + rect.width / 2,
+            y: rect.top + scrollY,
         };
 
         setHoveredVenue(venue);
@@ -494,9 +496,23 @@ function MeetingPage() {
                                         url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
                                     }}
                                     onMouseOver={(marker) =>
+                                        !isMobile &&
                                         handleMarkerMouseOver(venue, marker)
                                     }
-                                    onMouseOut={handleMarkerMouseOut}
+                                    onMouseOut={
+                                        !isMobile
+                                            ? handleMarkerMouseOut
+                                            : undefined
+                                    }
+                                    onTouchStart={(marker) =>
+                                        isMobile &&
+                                        handleMarkerMouseOver(venue, marker)
+                                    }
+                                    onTouchEnd={
+                                        isMobile
+                                            ? handleMarkerMouseOut
+                                            : undefined
+                                    }
                                 />
                             ))}
                         </GoogleMap>
@@ -771,6 +787,16 @@ function MeetingPage() {
                         </button>
                     </form>
                 </div>
+                {isMobile && hoveredVenue && (
+                    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[1000]">
+                        <button
+                            onClick={handleMarkerMouseOut}
+                            className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg"
+                        >
+                            Close Details
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
