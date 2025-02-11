@@ -13,19 +13,19 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "https://nexus-tau-seven.vercel.app",
+        origin: "http://localhost:5173",
         methods: ["GET", "POST"],
-        credentials: true
+        credentials: true,
     },
     pingTimeout: 60000,
-    transports: ['websocket', 'polling']
+    transports: ["websocket", "polling"],
 });
 
 const users = {};
 
 io.on("connection", (socket) => {
     console.log("🟢 New socket connection:", socket.id);
-    
+
     const userId = socket.handshake.query.userId;
     if (userId) {
         users[userId] = socket.id;
