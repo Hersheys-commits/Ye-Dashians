@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import useGetAllFriends from "../hooks/useGetAllFriends";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/axiosRequest";
+import Loading from "../components/Loading";
 
 const mapContainerStyle = {
     width: "100%",
@@ -228,7 +229,12 @@ function MeetingPage() {
         setIsOverlayMinimized((prev) => !prev);
     };
 
-    if (!isLoaded) return <div>Loading...</div>;
+    if (!isLoaded)
+        return (
+            <div className="flex justify-center items-center mt-10">
+                <Loading />
+            </div>
+        );
 
     // Use GET request via your server proxy (using Axios) to fetch nearby places
     const searchNearbyVenues = async () => {

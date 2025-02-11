@@ -1,6 +1,7 @@
 import React from "react";
 import User from "../left/User";
 import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
 
 function ChatHeader() {
     const selectedFriend = useSelector((state) => state.chat.selectedFriend);

@@ -57,7 +57,11 @@ function ProtectedRoute({ children }) {
     const { loading, authenticated } = useCheckAuth();
 
     if (loading) {
-        return <div className="flex justify-center items-center"><Loading/></div>;
+        return (
+            <div className="flex justify-center items-center mt-10">
+                <Loading />
+            </div>
+        );
     }
 
     if (!authenticated) {
@@ -73,7 +77,11 @@ function PublicRoute({ children }) {
     const { loading, authenticated } = useCheckAuth();
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex justify-center items-center mt-10">
+                <Loading />
+            </div>
+        );
     }
 
     if (authenticated) {

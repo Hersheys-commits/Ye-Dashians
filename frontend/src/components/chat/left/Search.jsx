@@ -4,6 +4,7 @@ import useGetAllFriends from "../../../hooks/useGetAllFriends";
 import { setSelectedFriend } from "../../../store/chatSlice";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
+import api from "../../../utils/axiosRequest";
 
 function Search() {
     const [search, setSearch] = useState("");

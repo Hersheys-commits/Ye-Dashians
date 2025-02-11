@@ -4,12 +4,14 @@ import { setSelectedFriend } from "../../../store/chatSlice";
 import { useSocket } from "../../../hooks/socketHook";
 import defaultAvatar from "../../../assets/Profile_user.png";
 import { FaImage } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 const User = ({ user, header = false }) => {
     const dispatch = useDispatch();
     const { selectedFriend, onlineUsers } = useSocket();
     const isSelected = selectedFriend?._id === user?._id;
     const isOnline = onlineUsers.includes(user?._id);
+    const navigate = useNavigate();
 
     const handleUserClick = () => {
         if (!header) {
@@ -32,13 +34,22 @@ const User = ({ user, header = false }) => {
                         src={user?.avatar ? user.avatar : defaultAvatar}
                         alt={user?.fullName || "User Avatar"}
                         className="w-full h-full object-cover"
+                        onClick={() => {
+                            if (header) navigate(`/profile/${user?.username}`);
+                        }}
                     />
                 </div>
             </div>
             <div className="flex flex-col text-sm pl-1">
-                <div className="font-bold text-base-content">
+                <div
+                    className="font-bold text-base-content"
+                    onClick={() => {
+                        if (header) navigate(`/profile/${user?.username}`);
+                    }}
+                >
                     {user?.fullName || "User"}
                 </div>
+
                 {!header && (
                     <div className="text-base-content/70">{user?.email}</div>
                 )}

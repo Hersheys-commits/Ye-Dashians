@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
+import Loading from "./Loading";
 
 function PersistWrapper({ children }) {
     const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +19,11 @@ function PersistWrapper({ children }) {
 
     if (isLoading) {
         // You can replace this with a loading spinner
-        return <div>Loading...</div>;
+        return (
+            <div className="flex justify-center items-center mt-10">
+                <Loading />
+            </div>
+        );
     }
 
     return children;

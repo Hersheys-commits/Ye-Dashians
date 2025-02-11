@@ -16,6 +16,7 @@
     "@reduxjs/toolkit": "^2.5.0",
     "@tailwindcss/vite": "^4.0.0",
     "axios": "^1.7.9",
+    "framer-motion": "^12.4.2",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.474.0",
     "mapbox-gl": "^3.9.4",

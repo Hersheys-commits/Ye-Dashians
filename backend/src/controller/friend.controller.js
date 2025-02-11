@@ -15,10 +15,10 @@ export const searchUsers = asyncHandler(async (req, res) => {
     }
 
     const users = await User.find({
-        username: {
-            $regex: query,
-            $options: "i",
-        },
+        $or: [
+            { username: { $regex: query, $options: "i" } },
+            { fullName: { $regex: query, $options: "i" } },
+        ],
     }).select("username fullName avatar email");
 
     return res

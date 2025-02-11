@@ -5,12 +5,15 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { logout } from "../store/authSlice";
 import api from "../utils/axiosRequest";
+import { useSocket } from "../hooks/socketHook";
+import defaultProfile from "../assets/Profile_user.png";
 
 // Custom hook to check authentication status using api.
 function useAuthStatus() {
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
+    const { selectedFriend } = useSocket();
 
     useEffect(() => {
         async function checkAuth() {
@@ -93,7 +96,12 @@ const Header = () => {
                     className="btn btn-ghost text-xl text-primary cursor-pointer"
                     onClick={() => navigateTo("/")}
                 >
-                    Nexus
+                    <img
+                        src="/image-removebg (1).png"
+                        alt="logo"
+                        className="w-8"
+                    />
+                    <div>Nexus</div>
                 </div>
             </div>
 
@@ -118,11 +126,20 @@ const Header = () => {
                         <div
                             tabIndex={0}
                             role="button"
-                            className="btn btn-ghost"
+                            className="btn btn-ghost flex items-center"
                         >
                             {user?.fullName || "User"}
+                            <img
+                                src={user?.avatar || defaultProfile}
+                                onError={(e) => {
+                                    e.target.onerror = null; // prevents infinite loop if default image fails
+                                    e.target.src = defaultProfile;
+                                }}
+                                alt="Profile"
+                                className="w-8 h-8 rounded-full"
+                            />
                             <svg
-                                className="w-4 h-4 ml-2"
+                                className="w-4 h-4 ml-1"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
