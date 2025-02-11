@@ -10,14 +10,14 @@ function ChatArea() {
 
     if (!selectedFriend) {
         return (
-            <div className="w-[70%] h-full bg-base-200">
+            <div className="w-[75%] h-full bg-base-200">
                 <NoChatSelected />
             </div>
         );
     }
 
     return (
-        <div className="w-[70%] h-full bg-base-100">
+        <div className="w-[75%] h-full bg-base-100">
             <div>
                 <ChatHeader />
             </div>

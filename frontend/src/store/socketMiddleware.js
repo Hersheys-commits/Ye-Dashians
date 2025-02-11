@@ -15,14 +15,9 @@ export const initializeSocket = (userId) => (dispatch) => {
         return;
     }
 
-<<<<<<< HEAD
     const SOCKET_URL =
         import.meta.env.VITE_BACKEND_URL || "http://localhost:4001";
 
-=======
-    const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "https://nexus-xwdr.onrender.com";
-    
->>>>>>> 0349444146aa112ddb36ac838891388025d4d9b1
     console.log("Initializing socket connection to:", SOCKET_URL);
 
     socket = io(SOCKET_URL, {

@@ -10,6 +10,7 @@ const chatSlice = createSlice({
     initialState,
     reducers: {
         setSelectedFriend(state, action) {
+            console.log("first", action.payload);
             state.selectedFriend = action.payload;
         },
         setMessages(state, action) {

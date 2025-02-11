@@ -122,7 +122,6 @@ function CurrentUserProfilePage() {
             // Update the profile with the response data (assuming response.data is the updated user).
             const dataForProfile = { user: response.data.data };
             setProfile(dataForProfile);
-            // console.log(response);
             // Exit edit mode.
             setIsEditing(false);
             // Reset the form with the updated data.
@@ -135,7 +134,7 @@ function CurrentUserProfilePage() {
             toast.success("Profile updated successfully.");
         } catch (error) {
             console.error("Update failed", error);
-            toast.error("Update failed. Please try again.");
+            toast.error("Update failed. Please fill all fields.");
         }
     };
 
@@ -376,17 +375,17 @@ function CurrentUserProfilePage() {
         <div>
             <Header />
             <div className="container mx-auto p-4">
-                <div className="flex flex-row mx-20 gap-8 p-8 bg-base-200 rounded-2xl shadow-lg">
+                {/* Profile Header Section */}
+                <div className="flex flex-col md:flex-row mx-4 md:mx-20 gap-8 p-4 md:p-8 bg-base-200 rounded-2xl shadow-lg">
                     {/* Profile Picture Section */}
                     <div className="flex flex-col items-center gap-4">
                         <ProfilePicture />
                     </div>
 
                     {/* Bio Section */}
-                    <div className="flex-1">
+                    <div className="flex-1 w-full">
                         <div className="flex items-center justify-between mb-4">
-                            <h1 className="text-3xl font-bold flex items-center gap-2">
-                                {/* <BsChatHeartFill className="text-secondary" /> */}
+                            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
                                 About Me
                             </h1>
                         </div>
@@ -398,7 +397,7 @@ function CurrentUserProfilePage() {
                             >
                                 <textarea
                                     {...registerBio("bio")}
-                                    className="textarea textarea-bordered w-full h-32 text-lg"
+                                    className="textarea textarea-bordered w-full h-32 text-base md:text-lg"
                                     placeholder="Share something about yourself..."
                                     autoFocus
                                 />
@@ -406,13 +405,13 @@ function CurrentUserProfilePage() {
                                     <button
                                         type="button"
                                         onClick={() => setEditingBio(false)}
-                                        className="btn btn-outline btn-error"
+                                        className="btn btn-outline btn-error btn-sm md:btn-md"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="btn btn-primary"
+                                        className="btn btn-primary btn-sm md:btn-md"
                                     >
                                         Save Bio
                                     </button>
@@ -420,7 +419,7 @@ function CurrentUserProfilePage() {
                             </form>
                         ) : (
                             <div className="group relative">
-                                <div className="prose-lg text-gray-300 whitespace-pre-wrap text-md">
+                                <div className="prose-base md:prose-lg text-gray-300 whitespace-pre-wrap">
                                     {profile?.user?.bio || (
                                         <span className="italic text-gray-400">
                                             No bio added yet...
@@ -429,34 +428,31 @@ function CurrentUserProfilePage() {
                                 </div>
                                 <button
                                     onClick={handleBioEdit}
-                                    className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity btn btn-ghost btn-circle"
+                                    className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity btn btn-ghost btn-circle btn-sm md:btn-md"
                                 >
-                                    <FaEdit className="text-2xl text-secondary" />
+                                    <FaEdit className="text-xl md:text-2xl text-secondary" />
                                 </button>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* <div className="divider my-12 before:bg-gray-300 after:bg-gray-300">
-                    <span className="text-2xl font-bold text-gray-200 px-4">
-                        Profile Details
-                    </span>
-                </div> */}
-
                 <div className="divider">Profile</div>
+
+                {/* Main Profile Section */}
                 <div className="card bg-base-100 shadow-xl">
-                    <div className="card-body">
-                        <div className="flex flex-wrap gap-8 justify-center">
-                            {/* Profile Section */}
-                            <div className="card bg-base-100 shadow-xl p-6 w-96">
+                    <div className="card-body p-4 md:p-8">
+                        {/* Profile Cards */}
+                        <div className="flex flex-col md:flex-row gap-8 justify-center items-stretch">
+                            {/* Profile Details Card */}
+                            <div className="card bg-base-100 shadow-xl p-4 md:p-6 w-full md:w-96">
                                 <div className="flex flex-col items-center">
                                     {!isEditing ? (
                                         <>
-                                            <h1 className="card-title text-2xl mb-4">
+                                            <h1 className="card-title text-xl md:text-2xl mb-4">
                                                 {profile?.user?.fullName}
                                             </h1>
-                                            <div className="w-full grid grid-cols-2 gap-4">
+                                            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div className="space-y-2">
                                                     <div>
                                                         <span className="font-semibold">
@@ -517,7 +513,7 @@ function CurrentUserProfilePage() {
                                             </div>
                                             <button
                                                 onClick={handleUpdateClick}
-                                                className="btn btn-primary mt-6 w-full"
+                                                className="btn btn-primary mt-6 w-full btn-sm md:btn-md"
                                             >
                                                 <FaEdit className="mr-2" />
                                                 Edit Profile
@@ -541,7 +537,7 @@ function CurrentUserProfilePage() {
                                                 />
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div className="form-control">
                                                     <label className="label">
                                                         <span className="label-text">
@@ -615,20 +611,19 @@ function CurrentUserProfilePage() {
                                 </div>
                             </div>
 
-                            {/* Preferences Section */}
-                            <div className="card bg-base-100 shadow-xl p-6 w-96">
-                                <h2 className="text-2xl font-bold text-center mb-6">
+                            {/* Preferences Card */}
+                            <div className="card bg-base-100 shadow-xl p-4 md:p-6 w-full md:w-96">
+                                <h2 className="text-xl md:text-2xl font-bold text-center mb-6">
                                     Place Preferences
                                 </h2>
                                 {!isPreferencesEditable ? (
                                     <>
-                                        <div className="grid grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
                                             {Object.keys(placeValues || {}).map(
                                                 (place) => (
                                                     <button
                                                         key={place}
-                                                        className={`btn ${placeValues[place] ? "btn-primary" : "btn-outline"}`}
-                                                        // disabled
+                                                        className={`btn btn-sm md:btn-md ${placeValues[place] ? "btn-primary" : "btn-outline"}`}
                                                     >
                                                         {place
                                                             .charAt(0)
@@ -642,7 +637,7 @@ function CurrentUserProfilePage() {
                                             onClick={() =>
                                                 setIsPreferencesEditable(true)
                                             }
-                                            className="btn btn-warning btn-sm mt-4 w-full"
+                                            className="btn btn-warning btn-sm md:btn-md mt-4 w-full"
                                         >
                                             Update Preferences
                                         </button>
@@ -653,13 +648,13 @@ function CurrentUserProfilePage() {
                                             onSubmitPlaces
                                         )}
                                     >
-                                        <div className="grid grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
                                             {Object.keys(placeValues || {}).map(
                                                 (place) => (
                                                     <button
                                                         type="button"
                                                         key={place}
-                                                        className={`btn ${placeValues[place] ? "btn-primary" : "btn-outline"}`}
+                                                        className={`btn btn-sm md:btn-md ${placeValues[place] ? "btn-primary" : "btn-outline"}`}
                                                         onClick={() =>
                                                             setValue(
                                                                 place,
@@ -679,7 +674,7 @@ function CurrentUserProfilePage() {
                                         </div>
                                         <button
                                             type="button"
-                                            className="btn btn-secondary mt-4 w-full"
+                                            className="btn btn-secondary btn-sm md:btn-md mt-4 w-full"
                                             onClick={toggleAllPlaces}
                                         >
                                             Select/Unselect All
@@ -687,13 +682,13 @@ function CurrentUserProfilePage() {
                                         <div className="card-actions justify-between mt-6">
                                             <button
                                                 type="submit"
-                                                className="btn btn-primary"
+                                                className="btn btn-primary btn-sm md:btn-md"
                                             >
                                                 Submit
                                             </button>
                                             <button
                                                 type="button"
-                                                className="btn btn-error"
+                                                className="btn btn-error btn-sm md:btn-md"
                                                 onClick={() =>
                                                     setIsPreferencesEditable(
                                                         false
@@ -709,123 +704,150 @@ function CurrentUserProfilePage() {
                         </div>
 
                         {/* Friends Section */}
-                        <div className="divider">Friends</div>
-                        {profile?.user?.friends?.length > 0 ? (
-                            <div className="space-y-4">
-                                {profile?.user?.friends.map((friend) => (
-                                    <div
-                                        key={friend.userId}
-                                        className="flex justify-between items-center bg-base-200 p-3 rounded-lg"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <img
-                                                src={
-                                                    friendProfiles[
-                                                        friend?.userId
-                                                    ] ||
-                                                    "/src/assets/Profile_user.png"
-                                                }
-                                                alt={friend?.username}
-                                                className="w-12 h-12 rounded-full object-cover bg-white"
-                                            />
-                                            <span className="font-medium">
-                                                @{friend?.username}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <MdOutlineChat
-                                                onClick={() => {
-                                                    navigate("/message");
-                                                    dispatch(
-                                                        setSelectedFriend(
-                                                            friend
-                                                        )
-                                                    );
-                                                }}
-                                                className="text-2xl text-pink-500 cursor-pointer hover:scale-110 transition-transform"
-                                            />
-                                            <button
-                                                onClick={() =>
-                                                    removeFriend(friend?.userId)
-                                                }
-                                                className="btn btn-error btn-sm"
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-center text-gray-500">
-                                No friends yet.
-                            </p>
-                        )}
-
-                        {/* Friend Requests Section */}
-                        <div className="divider">Friend Requests</div>
-                        {profile?.user?.friendRequests?.received?.length > 0 ? (
-                            <div className="space-y-4">
-                                {profile?.user?.friendRequests?.received.map(
-                                    (request) => (
+                        <div className="divider mt-8">Friends</div>
+                        <div className="px-2 md:px-4">
+                            {profile?.user?.friends?.length > 0 ? (
+                                <div className="space-y-4">
+                                    {profile?.user?.friends.map((friend) => (
                                         <div
-                                            key={request._id}
-                                            className="flex justify-between items-center bg-base-200 p-3 rounded-lg"
+                                            key={friend.userId}
+                                            className="flex flex-col md:flex-row justify-between items-center bg-base-200 p-3 rounded-lg gap-3 md:gap-0"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <img
                                                     src={
-                                                        friendRequestProfile[
-                                                            request?.requester
-                                                                ?.userId
+                                                        friendProfiles[
+                                                            friend?.userId
                                                         ] ||
                                                         "/src/assets/Profile_user.png"
                                                     }
-                                                    alt={
-                                                        request?.requester
-                                                            ?.username
-                                                    }
-                                                    className="w-12 h-12 rounded-full object-cover bg-white"
+                                                    alt={friend?.username}
+                                                    className="w-12 h-12 rounded-full object-cover bg-white cursor-pointer"
+                                                    onClick={() => {
+                                                        navigate(
+                                                            `/profile/${friend?.username}`
+                                                        );
+                                                    }}
                                                 />
-                                                <span className="font-medium">
-                                                    @
-                                                    {
-                                                        request?.requester
-                                                            ?.username
-                                                    }
+                                                <span
+                                                    className="font-medium cursor-pointer"
+                                                    onClick={() => {
+                                                        navigate(
+                                                            `/profile/${friend?.username}`
+                                                        );
+                                                    }}
+                                                >
+                                                    @{friend?.username}
                                                 </span>
                                             </div>
-                                            <div className="space-x-2">
-                                                <button
+                                            <div className="flex items-center gap-3">
+                                                <MdOutlineChat
                                                     onClick={() =>
-                                                        acceptFriendRequest(
-                                                            request._id
-                                                        )
+                                                        navigate("/message")
                                                     }
-                                                    className="btn btn-success btn-sm"
-                                                >
-                                                    Accept
-                                                </button>
+                                                    className="text-2xl text-pink-500 cursor-pointer hover:scale-110 transition-transform"
+                                                />
                                                 <button
                                                     onClick={() =>
-                                                        rejectFriendRequest(
-                                                            request._id
+                                                        removeFriend(
+                                                            friend?.userId
                                                         )
                                                     }
                                                     className="btn btn-error btn-sm"
                                                 >
-                                                    Reject
+                                                    Remove
                                                 </button>
                                             </div>
                                         </div>
-                                    )
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-center text-gray-500">
-                                No pending friend requests.
-                            </p>
-                        )}
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-center text-gray-500">
+                                    No friends yet.
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Friend Requests Section */}
+                        <div className="divider mt-8">Friend Requests</div>
+                        <div className="px-2 md:px-4">
+                            {profile?.user?.friendRequests?.received?.length >
+                            0 ? (
+                                <div className="space-y-4">
+                                    {profile?.user?.friendRequests?.received.map(
+                                        (request) => (
+                                            <div
+                                                key={request._id}
+                                                className="flex flex-col md:flex-row justify-between items-center bg-base-200 p-3 rounded-lg gap-3 md:gap-0"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <img
+                                                        src={
+                                                            friendRequestProfile[
+                                                                request
+                                                                    ?.requester
+                                                                    ?.userId
+                                                            ] ||
+                                                            "/src/assets/Profile_user.png"
+                                                        }
+                                                        alt={
+                                                            request?.requester
+                                                                ?.username
+                                                        }
+                                                        className="w-12 h-12 rounded-full object-cover bg-white cursor-pointer"
+                                                        onClick={() => {
+                                                            navigate(
+                                                                `/profile/${request?.requester?.username}`
+                                                            );
+                                                        }}
+                                                    />
+                                                    <span
+                                                        className="font-medium cursor-pointer"
+                                                        onClick={() => {
+                                                            navigate(
+                                                                `/profile/${request?.requester?.username}`
+                                                            );
+                                                        }}
+                                                    >
+                                                        @
+                                                        {
+                                                            request?.requester
+                                                                ?.username
+                                                        }
+                                                    </span>
+                                                </div>
+                                                <div className="space-x-2">
+                                                    <button
+                                                        onClick={() =>
+                                                            acceptFriendRequest(
+                                                                request._id
+                                                            )
+                                                        }
+                                                        className="btn btn-success btn-sm"
+                                                    >
+                                                        Accept
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            rejectFriendRequest(
+                                                                request._id
+                                                            )
+                                                        }
+                                                        className="btn btn-error btn-sm"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            ) : (
+                                <p className="text-center text-gray-500">
+                                    No pending friend requests.
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

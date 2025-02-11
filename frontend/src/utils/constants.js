@@ -106,3 +106,16 @@ export const themeOptions = [
     "abyss",
     "silk",
 ];
+
+export const venueOptions = [
+    { label: "Restaurant", value: "restaurant" },
+    { label: "Cafe", value: "cafe" },
+    { label: "Bar", value: "bar" },
+    { label: "Park", value: "park" },
+    { label: "Theater", value: "theater" },
+    { label: "Museum", value: "museum" },
+    { label: "Arcade", value: "arcade" },
+    { label: "Bakery", value: "bakery" },
+    { label: "Library", value: "library" },
+    { label: "Mall", value: "mall" },
+];

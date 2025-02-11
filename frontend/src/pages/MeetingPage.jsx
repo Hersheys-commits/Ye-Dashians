@@ -18,6 +18,7 @@ import useGetAllFriends from "../hooks/useGetAllFriends";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/axiosRequest";
 import Loading from "../components/Loading";
+import { venueOptions } from "../utils/constants";
 
 const mapContainerStyle = {
     width: "100%",
@@ -46,6 +47,10 @@ function MeetingPage() {
     const [isOverlayMinimized, setIsOverlayMinimized] = useState(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [selectedVenues, setSelectedVenues] = useState([]);
+    const [currentAddress, setCurrentAddress] = useState("");
+    const [hoveredVenue, setHoveredVenue] = useState(null);
+    const [markerPosition, setMarkerPosition] = useState(null);
 
     // 2. All useRef hooks
     const autocompleteRef1 = useRef(null);
@@ -53,7 +58,13 @@ function MeetingPage() {
 
     // 3. Custom hooks and other hooks
     const navigateTo = useNavigate();
-    const { calculateDistance, getZoomLevel, findMidpoint } = useMeetingHook();
+    const {
+        calculateDistance,
+        getZoomLevel,
+        findMidpoint,
+        getVenueHtmlString,
+        getPhotoUrl,
+    } = useMeetingHook();
     const [allFriends, friendLoading] = useGetAllFriends();
     const { selectedFriend, onlineUsers } = useSocket();
     const { sendMessageLoading, sendMessage } = useSendMessage();
@@ -62,8 +73,18 @@ function MeetingPage() {
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_API,
         libraries,
     });
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     // 4. All useEffect hooks
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -83,6 +104,15 @@ function MeetingPage() {
             { enableHighAccuracy: true }
         );
     }, []);
+
+    useEffect(() => {
+        if (formSubmitted && window.google) {
+            const map = document.querySelector('[aria-label="Map"]');
+            if (map) {
+                window.google.maps.event.trigger(map, "resize");
+            }
+        }
+    }, [formSubmitted]);
 
     useEffect(() => {
         if (
@@ -117,35 +147,94 @@ function MeetingPage() {
         }
     }, [addressCoordinates1, addressCoordinates2]);
 
-    const getVenueHtmlString = (venue, selectedFriend, getPhotoUrl) => {
-        return `
-          <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
-            <div class="md:flex">
-              <div class="p-6">
-                <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-                    <a href="/place/${venue.reference}" class="hover:underline">
-                        ${venue.name}
-                    </a>
+    // Custom InfoWindow component
+    const MarkerHoverInfo = ({ venue, position }) => {
+        if (!venue || !position) return null;
+
+        return (
+            <div
+                className="absolute z-50 bg-white rounded-lg shadow-lg p-3 w-64"
+                style={{
+                    left: `${position.x}px`,
+                    top: `${position.y}px`,
+                    transform: "translate(-50%, -130%)",
+                }}
+            >
+                <div className="flex flex-col">
+                    <div className="w-full h-32 mb-2">
+                        <img
+                            src={getPhotoUrl(venue)}
+                            alt={venue.name}
+                            className="w-full h-full object-cover rounded"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <h3 className="font-semibold text-gray-900">
+                            {venue.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                            {venue.vicinity}
+                        </p>
+                        <div className="flex items-center">
+                            <span className="text-sm text-gray-700">
+                                Rating: {venue.rating}
+                            </span>
+                            {venue.user_ratings_total && (
+                                <span className="text-xs text-gray-500 ml-1">
+                                    ({venue.user_ratings_total} reviews)
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <p class="block mt-1 text-lg leading-tight font-medium text-black">${venue.vicinity}</p>
-                <p class="mt-2 text-gray-500">Rating: ${venue.rating}</p>
-                ${
-                    venue.distanceInfo && venue.distanceInfo.user1
-                        ? `<p class="mt-2 text-gray-600 text-xs">From Location 1: ${venue.distanceInfo.user1.distance} (${venue.distanceInfo.user1.duration})</p>`
-                        : ""
-                }
-                ${
-                    venue.distanceInfo && venue.distanceInfo.user2
-                        ? `<p class="mt-2 text-gray-600 text-xs">From Location 2: ${venue.distanceInfo.user2.distance} (${venue.distanceInfo.user2.duration})</p>`
-                        : ""
-                }
-              </div>
-              <div class="md:flex-shrink-0">
-                <img class="h-48 w-full object-cover md:w-48" src="${getPhotoUrl(venue)}" alt="${venue.name}" />
-              </div>
             </div>
-          </div>
-        `;
+        );
+    };
+
+    // Handle marker mouse events
+    const handleMarkerMouseOver = (venue, marker) => {
+        // Get the map container element
+        const mapContainer = document.querySelector('[aria-label="Map"]');
+        if (!mapContainer) return;
+
+        // Get the marker's DOM element
+        const markerElement = mapContainer.querySelector(
+            `img[src="${marker.icon.url}"]`
+        );
+        if (!markerElement) return;
+
+        // Get the marker's position relative to the viewport
+        const rect = markerElement.getBoundingClientRect();
+
+        // Get the map container's position
+        const mapRect = mapContainer.getBoundingClientRect();
+
+        // Calculate position relative to the map container
+        const pos = {
+            x: rect.left - mapRect.left + rect.width / 2,
+            y: rect.top - mapRect.top,
+        };
+
+        setHoveredVenue(venue);
+        setMarkerPosition(pos);
+    };
+
+    // Add new function to get address from coordinates
+    const getAddressFromCoordinates = async (lat, lng) => {
+        try {
+            const response = await api.get("/api/geocode", {
+                params: {
+                    latlng: `${lat},${lng}`,
+                },
+                withCredentials: true,
+            });
+            if (response.data && response.data.results) {
+                return response.data.results[0].formatted_address;
+            }
+        } catch (error) {
+            console.error("Error fetching address:", error);
+        }
+        return "";
     };
 
     const handleShare = async (venue) => {
@@ -179,19 +268,6 @@ function MeetingPage() {
         }
     };
 
-    // Helper function to get the photo URL for the first photo only
-    const getPhotoUrl = (venue) => {
-        if (
-            venue.photos &&
-            venue.photos.length > 0 &&
-            venue.photos[0].photo_reference
-        ) {
-            return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${venue.photos[0].width}&photoreference=${venue.photos[0].photo_reference}&key=${import.meta.env.VITE_GOOGLE_MAP_API}`;
-        }
-        // Template error photo if no valid photo exists
-        return "/api/placeholder/96/96";
-    };
-
     // Handle place selection for both locations
     const handlePlaceSelect = (autocomplete, userIndex) => {
         const place = autocomplete.getPlace();
@@ -214,13 +290,34 @@ function MeetingPage() {
         }
     };
 
-    const handleUseCurrentLocation = (userIndex) => {
+    // Modify handleUseCurrentLocation
+    const handleUseCurrentLocation = async (userIndex) => {
         if (userIndex === 1) {
+            const address = await getAddressFromCoordinates(
+                currentLocation.lat,
+                currentLocation.lng
+            );
             setAddressCoordinates1(currentLocation);
             setSelectedAddress1("Current Location");
+            if (autocompleteRef1.current) {
+                const input = autocompleteRef1.current
+                    .getContainer()
+                    .querySelector("input");
+                if (input) input.value = address;
+            }
         } else if (userIndex === 2) {
+            const address = await getAddressFromCoordinates(
+                currentLocation.lat,
+                currentLocation.lng
+            );
             setAddressCoordinates2(currentLocation);
             setSelectedAddress2("Current Location");
+            if (autocompleteRef2.current) {
+                const input = autocompleteRef2.current
+                    .getContainer()
+                    .querySelector("input");
+                if (input) input.value = address;
+            }
         }
     };
 
@@ -236,7 +333,7 @@ function MeetingPage() {
             </div>
         );
 
-    // Use GET request via your server proxy (using Axios) to fetch nearby places
+    // Modify searchNearbyVenues
     const searchNearbyVenues = async () => {
         if (
             addressCoordinates1.lat === 0 ||
@@ -244,112 +341,110 @@ function MeetingPage() {
             addressCoordinates2.lat === 0 ||
             addressCoordinates2.lng === 0
         ) {
-            console.error("Both locations must be set.");
+            toast.error("Both locations must be set.");
+            return;
+        }
+
+        if (selectedVenues.length === 0) {
+            toast.error("Please select at least one venue type");
             return;
         }
 
         const midpoint = findMidpoint(addressCoordinates1, addressCoordinates2);
-
-        // Calculate distance (in km) and use 50% of that distance in meters (adjust as needed)
         const distanceKm = calculateDistance(
             addressCoordinates1,
             addressCoordinates2
         );
-        const radius = Math.max(100, Math.floor(distanceKm * 1000 * 0.5)); // at least 100 meters
-
-        const locationParam = `${midpoint.lat},${midpoint.lng}`;
-        const type = venuePreference.toLowerCase();
+        const radius = Math.max(100, Math.floor(distanceKm * 1000 * 0.5));
 
         try {
-            const response = await api.get("/api/nearbyplaces", {
-                params: {
-                    location: locationParam,
-                    radius: radius,
-                    type: type,
-                },
-                withCredentials: true,
-            });
+            const venuePromises = selectedVenues.map((venue) =>
+                api.get("/api/nearbyplaces", {
+                    params: {
+                        location: `${midpoint.lat},${midpoint.lng}`,
+                        radius: radius,
+                        type: venue,
+                    },
+                    withCredentials: true,
+                })
+            );
 
-            const data = response.data;
+            const responses = await Promise.all(venuePromises);
+            const allVenues = responses.flatMap(
+                (response) => response.data.results || []
+            );
 
-            if (data.status === "OK") {
-                // For each venue, fetch distance & duration info for both users using your backend endpoint.
-                const venuesWithDistance = await Promise.all(
-                    data.results.map(async (venue) => {
-                        try {
-                            const origin1 = `${addressCoordinates1?.lat},${addressCoordinates1?.lng}`;
-                            const origin2 = `${addressCoordinates2?.lat},${addressCoordinates2?.lng}`;
-                            const destination = `${venue.geometry.location?.lat},${venue.geometry.location?.lng}`;
+            // Remove duplicates based on place_id
+            const uniqueVenues = Array.from(
+                new Map(allVenues.map((venue) => [venue.place_id, venue]))
+            ).map(([_, venue]) => venue);
 
-                            const [response1, response2] = await Promise.all([
-                                api.get("/api/distance", {
-                                    params: {
-                                        origin: origin1,
-                                        destination: destination,
-                                    },
-                                    withCredentials: true,
-                                }),
-                                api.get("/api/distance", {
-                                    params: {
-                                        origin: origin2,
-                                        destination: destination,
-                                    },
-                                    withCredentials: true,
-                                }),
-                            ]);
-
-                            return {
-                                ...venue,
-                                distanceInfo: {
-                                    user1: response1.data, // Expected: { distance: "X km", duration: "Y mins" }
-                                    user2: response2.data,
+            const venuesWithDistance = await Promise.all(
+                uniqueVenues.map(async (venue) => {
+                    try {
+                        const [response1, response2] = await Promise.all([
+                            api.get("/api/distance", {
+                                params: {
+                                    origin: `${addressCoordinates1.lat},${addressCoordinates1.lng}`,
+                                    destination: `${venue.geometry.location.lat},${venue.geometry.location.lng}`,
                                 },
-                            };
-                        } catch (error) {
-                            console.error(
-                                "Error fetching distance info:",
-                                error
-                            );
-                            return venue;
-                        }
-                    })
-                );
+                                withCredentials: true,
+                            }),
+                            api.get("/api/distance", {
+                                params: {
+                                    origin: `${addressCoordinates2.lat},${addressCoordinates2.lng}`,
+                                    destination: `${venue.geometry.location.lat},${venue.geometry.location.lng}`,
+                                },
+                                withCredentials: true,
+                            }),
+                        ]);
 
-                console.log("aghsasdh", venuesWithDistance);
+                        return {
+                            ...venue,
+                            distanceInfo: {
+                                user1: response1.data,
+                                user2: response2.data,
+                            },
+                        };
+                    } catch (error) {
+                        console.error("Error fetching distance info:", error);
+                        return venue;
+                    }
+                })
+            );
 
-                setNearbyVenues(venuesWithDistance);
-
-                if (venuesWithDistance.length > 0) {
-                    setMapCenter(midpoint);
-                    setMapZoom(12);
-                    // Mark the form as submitted to trigger the new layout
-                    setFormSubmitted(true);
-                }
-            } else {
-                console.error(
-                    "Places API Error:",
-                    data.status,
-                    data.error_message
-                );
-            }
+            setNearbyVenues(venuesWithDistance);
+            setMapCenter(midpoint);
+            setMapZoom(12);
+            setFormSubmitted(true);
         } catch (error) {
             console.error("Error fetching nearby places:", error);
+            toast.error("Error fetching venues");
         }
+    };
+
+    const handleMarkerMouseOut = () => {
+        setHoveredVenue(null);
+        setMarkerPosition(null);
     };
 
     // Layout: If the form has been submitted, display a two-column layout:
     // Left: Map (70%), Right: Venue List (30%)
     // Otherwise, the map takes the full width.
-    const renderContent = () => {
-        if (formSubmitted) {
-            return (
-                <div className="flex h-full">
-                    <div className="w-7/10 h-full">
+    // Modify the main render layout
+    return (
+        <div className="h-screen flex flex-col overflow-hidden">
+            <Header />
+            <div className="flex-1 relative flex overflow-hidden flex-col md:flex-row">
+                {/* Map container */}
+                <div
+                    className={`h-[60vh] md:h-full relative transition-all duration-300 ease-in-out ${
+                        formSubmitted ? "md:w-[70%]" : "w-full"
+                    }`}
+                >
+                    <div className="w-full h-full">
                         <GoogleMap
-                            mapContainerStyle={{
-                                width: "100%",
-                                height: "100%",
-                            }}
+                            mapContainerStyle={mapContainerStyle}
                             center={mapCenter}
                             zoom={mapZoom}
                             options={{
@@ -360,57 +455,92 @@ function MeetingPage() {
                                 streetViewControl: false,
                                 fullscreenControl: true,
                             }}
+                            onLoad={(map) => {
+                                if (formSubmitted) {
+                                    setTimeout(() => {
+                                        google.maps.event.trigger(
+                                            map,
+                                            "resize"
+                                        );
+                                        map.setCenter(mapCenter);
+                                    }, 100);
+                                }
+                            }}
                         >
-                            {addressCoordinates1.lat !== 0 &&
-                                addressCoordinates1.lng !== 0 && (
-                                    <Marker position={addressCoordinates1} />
-                                )}
-                            {addressCoordinates2.lat !== 0 &&
-                                addressCoordinates2.lng !== 0 && (
-                                    <Marker position={addressCoordinates2} />
-                                )}
+                            {addressCoordinates1.lat !== 0 && (
+                                <Marker
+                                    position={addressCoordinates1}
+                                    icon={{
+                                        url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                                    }}
+                                />
+                            )}
+                            {addressCoordinates2.lat !== 0 && (
+                                <Marker
+                                    position={addressCoordinates2}
+                                    icon={{
+                                        url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                                    }}
+                                />
+                            )}
                             {nearbyVenues.map((venue, index) => (
                                 <Marker
                                     key={index}
-                                    position={venue.geometry.location}
+                                    position={{
+                                        lat: venue.geometry.location.lat,
+                                        lng: venue.geometry.location.lng,
+                                    }}
                                     icon={{
                                         url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
                                     }}
+                                    onMouseOver={(marker) =>
+                                        handleMarkerMouseOver(venue, marker)
+                                    }
+                                    onMouseOut={handleMarkerMouseOut}
                                 />
                             ))}
                         </GoogleMap>
+                        {/* Hover Info Window */}
+                        {hoveredVenue && markerPosition && (
+                            <MarkerHoverInfo
+                                venue={hoveredVenue}
+                                position={markerPosition}
+                            />
+                        )}
                     </div>
-                    <div className="w-3/10 h-full overflow-y-auto p-4 bg-gray-100 text-slate-900">
-                        <h3 className="font-bold text-lg mb-3">
-                            Nearby Venues
-                        </h3>
-                        {nearbyVenues.map((venue, index) => (
-                            <div
-                                key={index}
-                                className="mb-4 p-3 bg-white rounded shadow"
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        {/* {console.log(venue)} */}
-                                        <p
-                                            className="font-semibold"
-                                            onClick={() =>
-                                                navigateTo(
-                                                    `/place/${venue.reference}`
-                                                )
-                                            }
-                                        >
-                                            {venue.name}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            {venue.vicinity}
-                                        </p>
-                                        <p className="text-sm">
-                                            Rating: {venue.rating}
-                                        </p>
-                                        {/* Display distance & duration info if available */}
-                                        {venue.distanceInfo &&
-                                            venue.distanceInfo.user1 && (
+                </div>
+
+                {/* Venue suggestions */}
+                {formSubmitted && (
+                    <div className="h-[40vh] md:h-full w-full md:w-[30%] overflow-hidden flex flex-col border-t md:border-t-0 md:border-l border-gray-200">
+                        <div className="bg-gray-100 p-4 flex-1 overflow-y-auto">
+                            <h3 className="font-bold text-lg mb-3 text-slate-900 sticky top-0 bg-gray-100 py-2">
+                                Nearby Venues
+                            </h3>
+                            <div className="space-y-4">
+                                {nearbyVenues.map((venue, index) => (
+                                    <div
+                                        key={index}
+                                        className="p-3 bg-white rounded shadow flex flex-col md:flex-row"
+                                    >
+                                        <div className="flex-1">
+                                            <p
+                                                className="font-semibold cursor-pointer"
+                                                onClick={() =>
+                                                    navigateTo(
+                                                        `/place/${venue.reference}`
+                                                    )
+                                                }
+                                            >
+                                                {venue.name}
+                                            </p>
+                                            <p className="text-sm text-gray-600">
+                                                {venue.vicinity}
+                                            </p>
+                                            <p className="text-sm">
+                                                Rating: {venue.rating}
+                                            </p>
+                                            {venue.distanceInfo?.user1 && (
                                                 <p className="text-xs text-gray-700">
                                                     From Location 1:{" "}
                                                     {
@@ -425,8 +555,7 @@ function MeetingPage() {
                                                     )
                                                 </p>
                                             )}
-                                        {venue.distanceInfo &&
-                                            venue.distanceInfo.user2 && (
+                                            {venue.distanceInfo?.user2 && (
                                                 <p className="text-xs text-gray-700">
                                                     From Location 2:{" "}
                                                     {
@@ -441,119 +570,100 @@ function MeetingPage() {
                                                     )
                                                 </p>
                                             )}
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <select
-                                                className="p-1 text-sm border rounded"
-                                                defaultValue=""
-                                                onChange={(e) => {
-                                                    const friendId =
-                                                        e.target.value;
-                                                    // Look for the friend using _id instead of userId
-                                                    const friend =
-                                                        allFriends.find(
-                                                            (friend) =>
-                                                                friend._id ===
-                                                                friendId
+                                            <div className="mt-2 flex flex-col md:flex-row items-start gap-2">
+                                                <select
+                                                    className="p-1 text-sm border rounded w-full md:w-auto"
+                                                    defaultValue=""
+                                                    onChange={(e) => {
+                                                        const friend =
+                                                            allFriends.find(
+                                                                (friend) =>
+                                                                    friend._id ===
+                                                                    e.target
+                                                                        .value
+                                                            );
+                                                        dispatch(
+                                                            setSelectedFriend(
+                                                                friend
+                                                            )
                                                         );
-                                                    dispatch(
-                                                        setSelectedFriend(
-                                                            friend
-                                                        )
-                                                    );
-                                                }}
-                                            >
-                                                <option value="">
-                                                    Select friend
-                                                </option>
-                                                {allFriends.map((friend) => (
-                                                    <option
-                                                        key={friend._id}
-                                                        value={friend._id}
-                                                    >
-                                                        {friend.username}
+                                                    }}
+                                                >
+                                                    <option value="">
+                                                        Select friend
                                                     </option>
-                                                ))}
-                                            </select>
-
-                                            <button
-                                                onClick={() =>
-                                                    handleShare(venue)
-                                                }
-                                                className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                                            >
-                                                Share
-                                            </button>
+                                                    {allFriends.map(
+                                                        (friend) => (
+                                                            <option
+                                                                key={friend._id}
+                                                                value={
+                                                                    friend._id
+                                                                }
+                                                            >
+                                                                {
+                                                                    friend.username
+                                                                }
+                                                            </option>
+                                                        )
+                                                    )}
+                                                </select>
+                                                <button
+                                                    onClick={() =>
+                                                        handleShare(venue)
+                                                    }
+                                                    className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 w-full md:w-auto"
+                                                >
+                                                    Share
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="mt-2 md:mt-0 md:ml-4 w-full md:w-24 h-24 flex-shrink-0">
+                                            <img
+                                                src={getPhotoUrl(venue)}
+                                                alt={venue.name}
+                                                className="w-full h-full object-cover rounded"
+                                            />
                                         </div>
                                     </div>
-                                    <div className="ml-4 w-24 h-24">
-                                        <img
-                                            src={getPhotoUrl(venue)}
-                                            alt={venue.name}
-                                            className="w-full h-full object-cover rounded"
-                                        />
-                                    </div>
-                                </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
                     </div>
-                </div>
-            );
-        } else {
-            // Map takes full width when form is not submitted.
-            return (
-                <GoogleMap
-                    mapContainerStyle={mapContainerStyle}
-                    center={mapCenter}
-                    zoom={mapZoom}
-                    options={{
-                        styles: darkModeStyle,
-                        disableDefaultUI: false,
-                        zoomControl: true,
-                        mapTypeControl: false,
-                        streetViewControl: false,
-                        fullscreenControl: true,
-                    }}
-                >
-                    {addressCoordinates1.lat !== 0 &&
-                        addressCoordinates1.lng !== 0 && (
-                            <Marker position={addressCoordinates1} />
-                        )}
-                    {addressCoordinates2.lat !== 0 &&
-                        addressCoordinates2.lng !== 0 && (
-                            <Marker position={addressCoordinates2} />
-                        )}
-                    {nearbyVenues.map((venue, index) => (
-                        <Marker
-                            key={index}
-                            position={venue.location}
-                            icon={{
-                                url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-                            }}
-                        />
-                    ))}
-                </GoogleMap>
-            );
-        }
-    };
+                )}
 
-    return (
-        <div className="h-screen flex flex-col">
-            <Header />
-            <div className="relative flex-grow">
-                {renderContent()}
-                {/* Form Overlay */}
+                {/* Search form overlay */}
                 <div
-                    className={`absolute top-4 left-4 bg-gray-900 text-white p-5 shadow-lg rounded-lg z-10 transition-transform duration-300 ${
+                    className={`absolute ${isMobile ? "bottom-0 inset-x-0" : "top-4 left-4"} 
+                    bg-gray-900 text-white p-5 shadow-lg rounded-lg z-10 transition-transform duration-300 
+                    ${
                         isOverlayMinimized
-                            ? "translate-x-[-320px]"
-                            : "translate-x-0"
-                    } ${formSubmitted ? "max-w-lg" : "w-[90%] max-w-lg"}`}
+                            ? isMobile
+                                ? "translate-y-full"
+                                : "translate-x-[-320px]"
+                            : isMobile
+                              ? "translate-y-0 rounded-b-none"
+                              : "translate-x-0"
+                    }
+                    w-full md:max-w-lg md:rounded-lg`}
                 >
                     <button
-                        className="absolute -right-10 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-full shadow-md hover:bg-gray-700 transition duration-300"
-                        onClick={toggleOverlay}
+                        className={`absolute ${
+                            isMobile
+                                ? "top-[-40px] left-1/2 transform -translate-x-1/2"
+                                : "-right-10 top-1/2 -translate-y-1/2"
+                        } 
+                            bg-gray-800 text-white px-3 py-2 rounded-full shadow-md hover:bg-gray-700`}
+                        onClick={() =>
+                            setIsOverlayMinimized(!isOverlayMinimized)
+                        }
                     >
-                        {isOverlayMinimized ? "➜" : "⏴"}
+                        {isOverlayMinimized
+                            ? isMobile
+                                ? "↑"
+                                : "➜"
+                            : isMobile
+                              ? "↓"
+                              : "⏴"}
                     </button>
                     <h2 className="text-lg font-semibold mb-3">
                         Find a Meeting Place
@@ -565,7 +675,6 @@ function MeetingPage() {
                             searchNearbyVenues();
                         }}
                     >
-                        {/* Location 1 Input */}
                         <div className="relative">
                             <Autocomplete
                                 onLoad={(autocomplete) =>
@@ -592,7 +701,6 @@ function MeetingPage() {
                                 Use Current
                             </button>
                         </div>
-                        {/* Location 2 Input */}
                         <div className="relative">
                             <Autocomplete
                                 onLoad={(autocomplete) =>
@@ -612,19 +720,49 @@ function MeetingPage() {
                                 />
                             </Autocomplete>
                         </div>
-                        {/* Venue Preference Dropdown */}
-                        <select
-                            className="border p-2 rounded w-full bg-gray-800 text-white"
-                            value={venuePreference}
-                            onChange={(e) => setVenuePreference(e.target.value)}
-                        >
-                            <option value="">Select Venue Type</option>
-                            <option value="restaurant">Restaurant</option>
-                            <option value="bar">Bar</option>
-                            <option value="park">Park</option>
-                            <option value="cafe">Café</option>
-                        </select>
-                        {/* Submit Button */}
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">
+                                Select Venue Types:
+                            </label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {venueOptions.map((option) => (
+                                    <label
+                                        key={option.value}
+                                        className="flex items-center space-x-2"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            value={option.value}
+                                            checked={selectedVenues.includes(
+                                                option.value
+                                            )}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setSelectedVenues([
+                                                        ...selectedVenues,
+                                                        option.value,
+                                                    ]);
+                                                } else {
+                                                    setSelectedVenues(
+                                                        selectedVenues.filter(
+                                                            (v) =>
+                                                                v !==
+                                                                option.value
+                                                        )
+                                                    );
+                                                }
+                                            }}
+                                            className="form-checkbox"
+                                        />
+                                        <span className="text-sm">
+                                            {option.label}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
                         <button
                             type="submit"
                             className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition duration-300"
