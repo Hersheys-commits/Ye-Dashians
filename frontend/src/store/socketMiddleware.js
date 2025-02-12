@@ -14,7 +14,7 @@ export const initializeSocket = (userId) => (dispatch) => {
         console.log("Socket already connected");
         return;
     }
-    
+
     const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "https://nexus-xwdr.onrender.com";
     console.log("Initializing socket connection to:", SOCKET_URL);
 

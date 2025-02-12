@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import Header from "../components/Header";
 import api from "../utils/axiosRequest";
 import { MdOutlineChat } from "react-icons/md";
-import defaultImage from "../assets/Profile_user.png"
+import defaultImage from "../assets/Profile_user.png";
 
 function UserProfilePage() {
     const { username } = useParams();
@@ -175,14 +175,11 @@ function UserProfilePage() {
                                 <div className="w-64 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                                     <img
                                         className="bg-white"
-                                        src={
-                                            profile.avatar ||
-                                            defaultImage
-                                        }
+                                        src={profile.avatar || defaultImage}
                                         alt={profile.fullName}
                                         onError={(e) => {
-                                            e.target.src = defaultImage;  // Fallback to default image on error
-                                            e.target.onerror = null;     // Prevent infinite loop if default image also fails
+                                            e.target.src = defaultImage; // Fallback to default image on error
+                                            e.target.onerror = null; // Prevent infinite loop if default image also fails
                                         }}
                                     />
                                 </div>

@@ -38,8 +38,8 @@ const User = ({ user, header = false }) => {
                             if (header) navigate(`/profile/${user?.username}`);
                         }}
                         onError={(e) => {
-                            e.target.src = defaultAvatar;  // Fallback to default image on error
-                            e.target.onerror = null;     // Prevent infinite loop if default image also fails
+                            e.target.src = defaultAvatar; // Fallback to default image on error
+                            e.target.onerror = null; // Prevent infinite loop if default image also fails
                         }}
                     />
                 </div>

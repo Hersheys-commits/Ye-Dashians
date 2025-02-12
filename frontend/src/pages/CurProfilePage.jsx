@@ -715,24 +715,25 @@ function CurrentUserProfilePage() {
                                             className="flex flex-col md:flex-row justify-between items-center bg-base-200 p-3 rounded-lg gap-3 md:gap-0"
                                         >
                                             <div className="flex items-center gap-3">
-                                            <img
-                                                src={
-                                                    friendProfiles[
-                                                        friend?.userId
-                                                    ] || defaultImage
-                                                }
-                                                alt={friend?.username}
-                                                className="w-12 h-12 rounded-full object-cover bg-white cursor-pointer"
-                                                onClick={() => {
-                                                    navigate(
-                                                        `/profile/${friend?.username}`
-                                                    );
-                                                }}
-                                                onError={(e) => {
-                                                    e.target.src = defaultImage;  // Fallback to default image on error
-                                                    e.target.onerror = null;     // Prevent infinite loop if default image also fails
-                                                }}
-                                            />
+                                                <img
+                                                    src={
+                                                        friendProfiles[
+                                                            friend?.userId
+                                                        ] || defaultImage
+                                                    }
+                                                    alt={friend?.username}
+                                                    className="w-12 h-12 rounded-full object-cover bg-white cursor-pointer"
+                                                    onClick={() => {
+                                                        navigate(
+                                                            `/profile/${friend?.username}`
+                                                        );
+                                                    }}
+                                                    onError={(e) => {
+                                                        e.target.src =
+                                                            defaultImage; // Fallback to default image on error
+                                                        e.target.onerror = null; // Prevent infinite loop if default image also fails
+                                                    }}
+                                                />
                                                 <span
                                                     className="font-medium cursor-pointer"
                                                     onClick={() => {
@@ -791,8 +792,7 @@ function CurrentUserProfilePage() {
                                                                 request
                                                                     ?.requester
                                                                     ?.userId
-                                                            ] ||
-                                                            defaultImage
+                                                            ] || defaultImage
                                                         }
                                                         alt={
                                                             request?.requester
@@ -805,8 +805,10 @@ function CurrentUserProfilePage() {
                                                             );
                                                         }}
                                                         onError={(e) => {
-                                                            e.target.src = defaultImage;  // Fallback to default image on error
-                                                            e.target.onerror = null;     // Prevent infinite loop if default image also fails
+                                                            e.target.src =
+                                                                defaultImage; // Fallback to default image on error
+                                                            e.target.onerror =
+                                                                null; // Prevent infinite loop if default image also fails
                                                         }}
                                                     />
                                                     <span
