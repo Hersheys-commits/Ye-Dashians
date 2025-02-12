@@ -15,7 +15,8 @@ export const initializeSocket = (userId) => (dispatch) => {
         return;
     }
 
-    const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "https://nexus-xwdr.onrender.com";
+    const SOCKET_URL =
+        import.meta.env.VITE_BACKEND_URL || "https://nexus-xwdr.onrender.com";
     console.log("Initializing socket connection to:", SOCKET_URL);
 
     socket = io(SOCKET_URL, {

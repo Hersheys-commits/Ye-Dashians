@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 function Message({ message }) {
     const selectedFriend = useSelector((store) => store.chat.selectedFriend);
     // Assume the current user is the sender if message.senderId does NOT match the selected friend's id.
-    const userIsSender = message.senderId !== selectedfriend?._id;
+    const userIsSender = message.senderId !== selectedFriend._id;
     const time = formatMessageTime(message.createdAt);
     const navigateTo = useNavigate();
 

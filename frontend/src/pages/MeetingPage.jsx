@@ -594,7 +594,7 @@ function MeetingPage() {
                                                         const friend =
                                                             allFriends.find(
                                                                 (friend) =>
-                                                                    friend?._id ===
+                                                                    friend._id ===
                                                                     e.target
                                                                         .value
                                                             );
@@ -611,9 +611,9 @@ function MeetingPage() {
                                                     {allFriends.map(
                                                         (friend) => (
                                                             <option
-                                                                key={friend?._id}
+                                                                key={friend._id}
                                                                 value={
-                                                                    friend?._id
+                                                                    friend._id
                                                                 }
                                                             >
                                                                 {
