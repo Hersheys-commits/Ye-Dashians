@@ -225,7 +225,7 @@ const PlaceDetailsPage = () => {
                             >
                                 <option value="">Select friend</option>
                                 {allFriends.map((friend) => (
-                                    <option key={friend._id} value={friend._id}>
+                                    <option key={friend?._id} value={friend?._id}>
                                         {friend.username}
                                     </option>
                                 ))}

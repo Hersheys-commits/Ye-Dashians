@@ -14,7 +14,7 @@ const friendsSlice = createSlice({
         updateFriendLastMessage(state, action) {
             const { friendId, message } = action.payload;
             const friendIndex = state.list.findIndex(
-                (friend) => friend._id === friendId
+                (friend) => friend?._id === friendId
             );
             if (friendIndex !== -1) {
                 state.list[friendIndex] = {

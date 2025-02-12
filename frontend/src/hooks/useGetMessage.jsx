@@ -15,7 +15,7 @@ function useGetMessage() {
             if (selectedFriend?._id) {
                 try {
                     const res = await api.get(
-                        `/api/message/getMessage/${selectedFriend._id}`,
+                        `/api/message/getMessage/${selectedfriend?._id}`,
                         {
                             withCredentials: true,
                         }

@@ -21,7 +21,7 @@ function useGetFriendsWithLastMessages() {
                 const lastMessagesPromises = allFriends.map(async (friend) => {
                     try {
                         const response = await api.get(
-                            `/api/message/getLastMessage/${friend._id}`,
+                            `/api/message/getLastMessage/${friend?._id}`,
                             { withCredentials: true }
                         );
                         const res = {

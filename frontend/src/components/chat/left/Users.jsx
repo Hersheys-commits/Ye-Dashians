@@ -29,8 +29,8 @@ function Users() {
     // Filter friends based on online status when the checkbox is checked.
     const filteredFriends = showOnlineOnly
         ? allFriends.filter((friend) =>
-              // Ensure friend._id and the onlineUsers values are of the same type.
-              onlineUsers.includes(friend._id.toString())
+              // Ensure friend?._id and the onlineUsers values are of the same type.
+              onlineUsers.includes(friend?._id.toString())
           )
         : allFriends;
 

@@ -25,7 +25,7 @@ function useSendMessage() {
             }
             console.log("selectedFriend", selectedFriend);
             const res = await api.post(
-                `/api/message/sendMessage/${selectedFriend._id}`,
+                `/api/message/sendMessage/${selectedfriend?._id}`,
                 formData,
                 {
                     withCredentials: true,
