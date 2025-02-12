@@ -5,10 +5,13 @@ import { useNavigate } from "react-router-dom";
 
 function Message({ message }) {
     const selectedFriend = useSelector((store) => store.chat.selectedFriend);
+    // Assume the current user is the sender if message.senderId does NOT match the selected friend's id.
     const userIsSender = message.senderId !== selectedFriend._id;
     const time = formatMessageTime(message.createdAt);
     const navigateTo = useNavigate();
 
+    // Render the message content (supports text and image)
+    // If both image and text exist, image is rendered above the text.
     const renderContent = () => {
         return (
             <>
@@ -20,12 +23,9 @@ function Message({ message }) {
                     />
                 )}
                 {message.text && (
-                    <div
-                        className={`text-sm break-words ${message.isTemplate ? "w-full overflow-x-hidden" : ""}`}
-                    >
+                    <p className="text-sm">
                         {message.isTemplate ? (
-                            <div
-                                className="w-full max-w-full overflow-hidden"
+                            <span
                                 dangerouslySetInnerHTML={{
                                     __html: message.text,
                                 }}
@@ -33,29 +33,30 @@ function Message({ message }) {
                         ) : (
                             message.text
                         )}
-                    </div>
+                    </p>
                 )}
             </>
         );
     };
 
     return (
-        <div className="px-3 pt-3 w-full">
+        <div className="px-3 pt-3">
+            {/* Message Bubble */}
             <div
                 className={`flex ${userIsSender ? "justify-end" : "justify-start"}`}
             >
                 <div
                     className={`
-                        w-full sm:max-w-[80%] rounded-xl p-3 shadow-sm
-                        ${userIsSender ? "bg-primary text-primary-content" : "bg-base-200 text-base-content"}
-                    `}
+            max-w-[80%] rounded-xl p-3 shadow-sm
+            ${userIsSender ? "bg-primary text-primary-content" : "bg-base-200 text-base-content"}
+          `}
                 >
                     {renderContent()}
                     <p
                         className={`
-                            text-[10px] mt-1.5
-                            ${userIsSender ? "text-primary-content/70" : "text-base-content/70"}
-                        `}
+              text-[10px] mt-1.5
+              ${userIsSender ? "text-primary-content/70" : "text-base-content/70"}
+            `}
                     >
                         {time}
                     </p>
