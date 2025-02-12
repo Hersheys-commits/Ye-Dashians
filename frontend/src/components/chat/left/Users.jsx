@@ -59,7 +59,7 @@ function Users() {
                 style={{ maxHeight: "calc(75vh)" }}
             >
                 {filteredFriends.map((friend) => (
-                    <User key={friend._id} user={friend} />
+                    <User key={friend?._id} user={friend} />
                 ))}
             </div>
         </div>
