@@ -88,8 +88,11 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const options = {
-        // httpOnly: true,
-        secure: true,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // use secure cookies in production
+        sameSite: "none", // necessary for cross-site cookies
+        path: "/",
+        maxAge: 24 * 60 * 60 * 1000, // cookie expires in 1 day
     };
 
     return res
